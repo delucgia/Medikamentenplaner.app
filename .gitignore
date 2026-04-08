@@ -1,0 +1,15 @@
+# Hidden files and folders (except .gitignore)
+.*
+!.gitignore
+!.streamlit
+
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+
+
