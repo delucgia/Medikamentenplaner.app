@@ -1,7 +1,7 @@
 # Produkt-Roadmap – MediTrack (W09–W13)
 
 ## Ausgangslage
-Das GitHub-Repository, die Wireframes, das Storyboard und das Streamlit-Projekt wurden bereits erstellt.  
+Das GitHub-Repository, die Wireframes, das Storyboard wurden bereits erstellt.  
 Deshalb startet die Entwicklungsphase direkt mit der funktionalen Umsetzung der App.
 
 ---
