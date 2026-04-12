@@ -1,5 +1,5 @@
-#Die MediTrack App
-##Die App für eine einfache Medikamentenplanung
+# Die MediTrack App
+## Die App für eine einfache Medikamentenplanung
 
 
 Diese App wurde von folgenden Personen entwickelt:
