@@ -1,5 +1,3 @@
-# docs/Wireframe-Nutzertest.md
-
 ## Hypothese und Bewertung
 
 Hypothese:  
@@ -94,7 +92,7 @@ Neue Probleme
 
 • Keine klare Bearbeiten-/Löschen-Funktion sichtbar  
 
-• Vertrauen: Wurde das Medikament wirklich gespeichert? (müsste nochmal extra angezeigt werden mit z.B „erfolgreich gespeichert.“  
+• Vertrauen: Wurde das Medikament wirklich gespeichert? -müsste nochmal extra angezeigt werden mit z.B „erfolgreich gespeichert.“  
 
 • Barrierefreiheit (Schriftgröße, Kontrast) weiterhin unklar  
 
