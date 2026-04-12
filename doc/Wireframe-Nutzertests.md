@@ -1,10 +1,10 @@
 ## Hypothese und Bewertung
 
-Hypothese:  
+**Hypothese:**
 
 Nutzer*innen können mit der App „MediTrack“ ihre Medikamente hinzufügen, verwalten und ihre tägliche Einnahme übersichtlich nachvollziehen.
 
-Bewertung:  
+**Bewertung:**  
 
 Größtenteils bestätigt. Die Struktur (Hinzufügen → Übersicht → Bestätigung → Verlauf) wurde gut verstanden. Besonders das Hinzufügen von Medikamenten war nachvollziehbar, jedoch gab es kleinere Unsicherheiten bei Begriffen und Entscheidungsstellen.
 
@@ -12,11 +12,11 @@ Größtenteils bestätigt. Die Struktur (Hinzufügen → Übersicht → Bestäti
 
 ## Protokoll
 
-Testperson: Grossmutter, 78, wenig Technikaffin
+**Testperson** Grossmutter, 78, wenig Technikaffin
 
-Szenario: Neues Medikament hinzufügen und Einnahme bestätigen  
+**Szenario:** Neues Medikament hinzufügen und Einnahme bestätigen  
 
-Ablauf:  
+**Ablauf:**  
 
 1. App gestartet → versteht Willkommensscreen, aber wartet kurz auf nächsten Schritt, kurze Unsicherheit  
 
@@ -36,7 +36,7 @@ Ablauf:
 
 9. Verlauf wird geöffnet → Einträge verständlich, Status gut erkennbar  
 
-Beobachtungen:  
+**Beobachtungen:**  
 
 • Nutzerin orientiert sich stark an Buttons und klaren Aktionen  
 
@@ -50,7 +50,7 @@ Beobachtungen:
 
 ## Stichworte zum Test-Raster
 
-Was war gut?  
+**Was war gut?**  
 
 • Klarer Flow: Hinzufügen → Übersicht → Bestätigung → Verlauf  
 
@@ -64,7 +64,7 @@ Was war gut?
 
 • Verlauf verständlich und sinnvoll dargestellt  
 
-Was war schlecht?  
+**Was war schlecht?**  
 
 • Begriff „Bestätigen“ weiterhin nicht eindeutig, Farben könnten hier zusätzlich helfen  
 
@@ -76,7 +76,7 @@ Was war schlecht?
 
 • Teilweise zu viele ähnliche Schritte (Bestätigung + Erfolgsscreen)  
 
-Neue Ideen  
+**Neue Ideen**  
 
 • Klarere Button-Beschriftungen („Medikament speichern“ statt „Bestätigen“)  
 
@@ -86,7 +86,7 @@ Neue Ideen
 
 • Fortschrittsanzeige für tägliche Einnahme  
 
-Neue Probleme  
+**Neue Probleme** 
 
 • Gefahr von Eingabefehlern im Formular (z. B. falsche Uhrzeit)  
 
