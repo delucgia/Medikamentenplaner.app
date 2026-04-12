@@ -19,5 +19,5 @@ Deshalb startet die Entwicklungsphase direkt mit der funktionalen Umsetzung der 
 ## Entwicklungslogik
 
 Die App wird schrittweise weiterentwickelt.  
-Da die konzeptionellen Grundlagen wie Wireframes, Storyboard, GitHub-Repository und Streamlit-Projekt bereits vorhanden sind, beginnt die Roadmap direkt mit der funktionalen Umsetzung.  
+Da die konzeptionellen Grundlagen wie Wireframes, Storyboard und GitHub-Repository bereits vorhanden sind, beginnt die Roadmap direkt mit der funktionalen Umsetzung.  
 Jede Woche erweitert die App um ein neues zentrales Element.
