@@ -12,7 +12,7 @@ Größtenteils bestätigt. Die Struktur (Hinzufügen → Übersicht → Bestäti
 
 ## Protokoll
 
-**Testperson** Grossmutter, 78, wenig Technikaffin
+**Testperson:** Grossmutter, 78, wenig Technikaffin
 
 **Szenario:** Neues Medikament hinzufügen und Einnahme bestätigen  
 
