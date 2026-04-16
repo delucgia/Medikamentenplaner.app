@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "medication_id": 1,
+    "medication_name": "Dafalgan",
+    "date": "2026-04-16",
+    "time": "08:00",
+    "confirmed": true,
+    "note": "yeees"
+  }
+]

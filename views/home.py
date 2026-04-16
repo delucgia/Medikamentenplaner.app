@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title("Unsere erste Streamlit App")
+st.title("Die MediTrack App")
 
 """
 Diese App wurde von folgenden Personen entwickelt:

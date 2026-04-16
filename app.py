@@ -1,41 +1,97 @@
 import pandas as pd
 import streamlit as st
- 
+
 from utils.data_manager import DataManager
-
 from utils.login_manager import LoginManager
- 
-data_manager = DataManager(       # initialize data manager
 
-    fs_protocol='webdav',         # protocol for the filesystem, use webdav for switch drive
+# ---------------------------------------------------------
+# Seiten-Konfiguration
+# ---------------------------------------------------------
+st.set_page_config(page_title="MediTrack", page_icon="💊")
 
-    fs_root_folder="BMLD"  # folder on switch drive where the data is stored
+# ---------------------------------------------------------
+# Data Manager + Login
+# ---------------------------------------------------------
+data_manager = DataManager(
+    fs_protocol="webdav",
+    fs_root_folder="BMLD"
+)
 
-    ) 
+login_manager = LoginManager(data_manager)
+login_manager.login_register()
 
-login_manager = LoginManager(data_manager) # handles user login and registration
-
-login_manager.login_register()             # stops if not logged in
-
-if 'data_df' not in st.session_state:
-
-    st.session_state['data_df'] = data_manager.load_user_data(
-
-        'data.csv',                     # The file on switch drive where the data is stored
-
-        initial_value=pd.DataFrame(),   # Initial value if the file does not exist
-
-        parse_dates=['timestamp']       # Parse timestamp as datetime
-
+# ---------------------------------------------------------
+# MediTrack-Daten pro User laden
+# ---------------------------------------------------------
+if "medications_df" not in st.session_state:
+    st.session_state["medications_df"] = data_manager.load_user_data(
+        "medications.csv",
+        initial_value=pd.DataFrame(
+            columns=["id", "name", "time", "days", "note", "created_at"]
+        ),
+        parse_dates=["created_at"]
     )
 
-if 'data_df' not in st.session_state:
-    st.session_state['data_df'] = pd.DataFrame()
+if "intakes_df" not in st.session_state:
+    st.session_state["intakes_df"] = data_manager.load_user_data(
+        "intakes.csv",
+        initial_value=pd.DataFrame(
+            columns=[
+                "id",
+                "medication_id",
+                "medication_name",
+                "date",
+                "time",
+                "confirmed",
+                "note",
+                "created_at",
+            ]
+        ),
+        parse_dates=["created_at"]
+    )
 
-st.set_page_config(page_title="Meine App", page_icon=":material/home:")
+# Falls nichts geladen wurde
+if st.session_state["medications_df"] is None:
+    st.session_state["medications_df"] = pd.DataFrame(
+        columns=["id", "name", "time", "days", "note", "created_at"]
+    )
 
-pg_home = st.Page("views/home.py", title="Home", icon=":material/home:", default=True)
-pg_second = st.Page("views/noten.py", title="Notenrechner", icon=":material/info:")
+if st.session_state["intakes_df"] is None:
+    st.session_state["intakes_df"] = pd.DataFrame(
+        columns=[
+            "id",
+            "medication_id",
+            "medication_name",
+            "date",
+            "time",
+            "confirmed",
+            "note",
+            "created_at",
+        ]
+    )
 
-pg = st.navigation([pg_home, pg_second])
+# Zusätzliche UI-States
+if "last_success_message" not in st.session_state:
+    st.session_state["last_success_message"] = "Super!"
+
+if "editing_medication_id" not in st.session_state:
+    st.session_state["editing_medication_id"] = None
+
+if "editing_intake_id" not in st.session_state:
+    st.session_state["editing_intake_id"] = None
+
+# Optional: DataManager global verfügbar machen
+st.session_state["data_manager"] = data_manager
+
+# ---------------------------------------------------------
+# Navigation
+# ---------------------------------------------------------
+pg_main = st.Page(
+    "views/MediTrack.py",
+    title="MediTrack",
+    icon="💊",
+    default=True
+)
+
+pg = st.navigation([pg_main])
 pg.run()
