@@ -11,6 +11,8 @@ st.set_page_config(page_title="MediTrack", page_icon="💊", layout="wide")
 # =========================================================
 MEDICATIONS_FILE = "medications.json"
 INTAKES_FILE = "intakes.json"
+BLOOD_PRESSURE_FILE = "blood_pressure.json"
+BLOOD_SUGAR_FILE = "blood_sugar.json"
 
 DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 DAY_MAP = {
@@ -22,7 +24,6 @@ DAY_MAP = {
     5: "Sa",
     6: "So",
 }
-
 
 # =========================================================
 # Daten laden / speichern
@@ -50,6 +51,12 @@ if "medications" not in st.session_state:
 
 if "intakes" not in st.session_state:
     st.session_state.intakes = load_data(INTAKES_FILE)
+
+if "blood_pressure_entries" not in st.session_state:
+    st.session_state.blood_pressure_entries = load_data(BLOOD_PRESSURE_FILE)
+
+if "blood_sugar_entries" not in st.session_state:
+    st.session_state.blood_sugar_entries = load_data(BLOOD_SUGAR_FILE)
 
 if "editing_medication_id" not in st.session_state:
     st.session_state.editing_medication_id = None
@@ -134,7 +141,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
 
 # =========================================================
 # Helper
@@ -261,6 +267,74 @@ def delete_intake(intake_id):
 
 
 # =========================================================
+# Blutdruck / Blutzucker Funktionen
+# =========================================================
+def upsert_blood_pressure(entry_date, systolic, diastolic):
+    entry_date_str = pd.to_datetime(entry_date).strftime("%Y-%m-%d")
+    entries = st.session_state.blood_pressure_entries
+
+    existing_index = next(
+        (i for i, entry in enumerate(entries) if entry["date"] == entry_date_str),
+        None
+    )
+
+    new_entry = {
+        "date": entry_date_str,
+        "systolic": int(systolic),
+        "diastolic": int(diastolic),
+    }
+
+    if existing_index is not None:
+        entries[existing_index] = new_entry
+    else:
+        entries.append(new_entry)
+
+    entries.sort(key=lambda x: x["date"])
+    st.session_state.blood_pressure_entries = entries
+    save_data(BLOOD_PRESSURE_FILE, entries)
+
+
+def upsert_blood_sugar(entry_date, value):
+    entry_date_str = pd.to_datetime(entry_date).strftime("%Y-%m-%d")
+    entries = st.session_state.blood_sugar_entries
+
+    existing_index = next(
+        (i for i, entry in enumerate(entries) if entry["date"] == entry_date_str),
+        None
+    )
+
+    new_entry = {
+        "date": entry_date_str,
+        "value": float(value),
+    }
+
+    if existing_index is not None:
+        entries[existing_index] = new_entry
+    else:
+        entries.append(new_entry)
+
+    entries.sort(key=lambda x: x["date"])
+    st.session_state.blood_sugar_entries = entries
+    save_data(BLOOD_SUGAR_FILE, entries)
+
+
+def delete_blood_pressure(entry_date_str):
+    st.session_state.blood_pressure_entries = [
+        entry for entry in st.session_state.blood_pressure_entries
+        if entry["date"] != entry_date_str
+    ]
+    save_data(BLOOD_PRESSURE_FILE, st.session_state.blood_pressure_entries)
+
+
+def delete_blood_sugar(entry_date_str):
+    st.session_state.blood_sugar_entries = [
+        entry for entry in st.session_state.blood_sugar_entries
+        if entry["date"] != entry_date_str
+    ]
+    save_data(BLOOD_SUGAR_FILE, st.session_state.blood_sugar_entries)
+
+
+# =========================================================
 # Sidebar
 # =========================================================
 with st.sidebar:
@@ -269,16 +343,26 @@ with st.sidebar:
 
     if st.button("Dashboard", use_container_width=True):
         go_to("dashboard")
+
     if st.button("Medikamente", use_container_width=True):
         go_to("medications")
+
     if st.button("Medikament hinzufügen", use_container_width=True):
         st.session_state.editing_medication_id = None
         go_to("medication_form")
+
     if st.button("Einnahme erfassen", use_container_width=True):
         st.session_state.editing_intake_id = None
         go_to("intake_form")
+
     if st.button("Verlauf", use_container_width=True):
         go_to("history")
+
+    if st.button("Blutdruck-Tagebuch", use_container_width=True):
+        go_to("blood_pressure")
+
+    if st.button("Blutzucker-Tagebuch", use_container_width=True):
+        go_to("blood_sugar")
 
 
 # =========================================================
@@ -524,6 +608,144 @@ def screen_history():
                 go_to("success")
 
 
+def screen_blood_pressure():
+    st.markdown("## Mein Blutdruck-Tagebuch")
+
+    with st.form("blood_pressure_form"):
+        bp_date = st.date_input("Datum", value=date.today(), key="bp_date")
+
+        c1, c2 = st.columns(2)
+        with c1:
+            bp_systolic = st.number_input(
+                "Systolisch (mmHg)",
+                min_value=50,
+                max_value=300,
+                value=120,
+                step=1,
+                key="bp_systolic"
+            )
+
+        with c2:
+            bp_diastolic = st.number_input(
+                "Diastolisch (mmHg)",
+                min_value=30,
+                max_value=200,
+                value=80,
+                step=1,
+                key="bp_diastolic"
+            )
+
+        bp_submit = st.form_submit_button("Blutdruck speichern")
+
+        if bp_submit:
+            upsert_blood_pressure(bp_date, bp_systolic, bp_diastolic)
+            st.success("Super! Der Blutdruckeintrag wurde gespeichert.")
+
+            if bp_systolic > 180 or bp_diastolic > 120 or bp_systolic < 80 or bp_diastolic < 50:
+                st.error("Kritischer Blutdruckwert. Bitte dringend ärztlich abklären.")
+            elif bp_systolic > 140 or bp_diastolic > 90 or bp_systolic < 90 or bp_diastolic < 60:
+                st.warning("Auffälliger Blutdruckwert. Bitte beobachten und gegebenenfalls ärztlich abklären.")
+
+    entries = st.session_state.blood_pressure_entries
+
+    if entries:
+        bp_df = pd.DataFrame(entries)
+        bp_df["date"] = pd.to_datetime(bp_df["date"])
+        bp_df = bp_df.sort_values("date")
+
+        bp_table = bp_df.copy()
+        bp_table["date"] = bp_table["date"].dt.strftime("%Y-%m-%d")
+        bp_table = bp_table.rename(
+            columns={
+                "date": "Datum",
+                "systolic": "Systolisch (mmHg)",
+                "diastolic": "Diastolisch (mmHg)",
+            }
+        )
+
+        st.dataframe(bp_table, use_container_width=True, hide_index=True)
+
+        bp_chart = bp_df[["date", "systolic", "diastolic"]].copy().set_index("date")
+        st.line_chart(bp_chart, use_container_width=True)
+
+        with st.expander("Blutdruckeintrag löschen"):
+            bp_delete_options = [entry["date"] for entry in entries]
+            bp_delete_date = st.selectbox(
+                "Welches Datum möchtest du löschen?",
+                options=bp_delete_options,
+                key="bp_delete_date"
+            )
+            if st.button("Blutdruckeintrag löschen", key="delete_bp_button"):
+                delete_blood_pressure(bp_delete_date)
+                st.success("Blutdruckeintrag wurde gelöscht.")
+                st.rerun()
+    else:
+        st.info("Noch keine Blutdruckwerte eingetragen.")
+
+
+def screen_blood_sugar():
+    st.markdown("## Mein Blutzucker-Tagebuch")
+
+    with st.form("blood_sugar_form"):
+        bs_date = st.date_input("Datum", value=date.today(), key="bs_date")
+
+        bs_value = st.number_input(
+            "Blutzucker (mmol/l)",
+            min_value=0.0,
+            max_value=40.0,
+            value=5.5,
+            step=0.1,
+            format="%.1f",
+            key="bs_value"
+        )
+
+        bs_submit = st.form_submit_button("Blutzucker speichern")
+
+        if bs_submit:
+            upsert_blood_sugar(bs_date, bs_value)
+            st.success("Super! Der Blutzuckereintrag wurde gespeichert.")
+
+            if bs_value > 15 or bs_value < 3:
+                st.error("Kritischer Blutzuckerwert. Bitte dringend ärztlich abklären.")
+            elif bs_value > 10 or bs_value < 3.5:
+                st.warning("Auffälliger Blutzuckerwert. Bitte beobachten und gegebenenfalls ärztlich abklären.")
+
+    entries = st.session_state.blood_sugar_entries
+
+    if entries:
+        bs_df = pd.DataFrame(entries)
+        bs_df["date"] = pd.to_datetime(bs_df["date"])
+        bs_df = bs_df.sort_values("date")
+
+        bs_table = bs_df.copy()
+        bs_table["date"] = bs_table["date"].dt.strftime("%Y-%m-%d")
+        bs_table = bs_table.rename(
+            columns={
+                "date": "Datum",
+                "value": "Blutzucker (mmol/l)",
+            }
+        )
+
+        st.dataframe(bs_table, use_container_width=True, hide_index=True)
+
+        bs_chart = bs_df[["date", "value"]].copy().set_index("date")
+        st.line_chart(bs_chart, use_container_width=True)
+
+        with st.expander("Blutzuckereintrag löschen"):
+            bs_delete_options = [entry["date"] for entry in entries]
+            bs_delete_date = st.selectbox(
+                "Welches Datum möchtest du löschen?",
+                options=bs_delete_options,
+                key="bs_delete_date"
+            )
+            if st.button("Blutzuckereintrag löschen", key="delete_bs_button"):
+                delete_blood_sugar(bs_delete_date)
+                st.success("Blutzuckereintrag wurde gelöscht.")
+                st.rerun()
+    else:
+        st.info("Noch keine Blutzuckerwerte eingetragen.")
+
+
 def screen_success():
     message = st.session_state.get("last_success_message", "Super!")
 
@@ -562,289 +784,10 @@ pages = {
     "medication_form": screen_medication_form,
     "intake_form": screen_intake_form,
     "history": screen_history,
+    "blood_pressure": screen_blood_pressure,
+    "blood_sugar": screen_blood_sugar,
     "success": screen_success,
 }
 
 current_page = st.session_state.page
 pages.get(current_page, screen_dashboard)()
-
-# =========================================================
-# Blutdruck- und Blutzucker-Tagebücher
-# =========================================================
-
-data_manager = st.session_state["data_manager"]
-
-# -------------------------
-# Daten laden
-# -------------------------
-if "blood_pressure_df" not in st.session_state:
-    st.session_state["blood_pressure_df"] = data_manager.load_user_data(
-        "blood_pressure.csv",
-        initial_value=pd.DataFrame(
-            columns=["date", "systolic", "diastolic", "created_at"]
-        ),
-        parse_dates=["date", "created_at"]
-    )
-
-if "blood_sugar_df" not in st.session_state:
-    st.session_state["blood_sugar_df"] = data_manager.load_user_data(
-        "blood_sugar.csv",
-        initial_value=pd.DataFrame(
-            columns=["date", "value", "created_at"]
-        ),
-        parse_dates=["date", "created_at"]
-    )
-
-if st.session_state["blood_pressure_df"] is None:
-    st.session_state["blood_pressure_df"] = pd.DataFrame(
-        columns=["date", "systolic", "diastolic", "created_at"]
-    )
-
-if st.session_state["blood_sugar_df"] is None:
-    st.session_state["blood_sugar_df"] = pd.DataFrame(
-        columns=["date", "value", "created_at"]
-    )
-
-
-# -------------------------
-# Speichern
-# -------------------------
-def save_blood_pressure():
-    data_manager.save_user_data(
-        "blood_pressure.csv",
-        st.session_state["blood_pressure_df"]
-    )
-
-
-def save_blood_sugar():
-    data_manager.save_user_data(
-        "blood_sugar.csv",
-        st.session_state["blood_sugar_df"]
-    )
-
-
-# -------------------------
-# Hilfsfunktionen
-# -------------------------
-def upsert_blood_pressure(entry_date, systolic, diastolic):
-    df = st.session_state["blood_pressure_df"].copy()
-
-    entry_date = pd.to_datetime(entry_date).normalize()
-
-    if not df.empty:
-        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
-
-    existing_idx = df.index[df["date"] == entry_date].tolist() if not df.empty else []
-
-    new_row = pd.DataFrame(
-        [{
-            "date": entry_date,
-            "systolic": int(systolic),
-            "diastolic": int(diastolic),
-            "created_at": pd.Timestamp.now(),
-        }]
-    )
-
-    if existing_idx:
-        df.loc[existing_idx[0], "systolic"] = int(systolic)
-        df.loc[existing_idx[0], "diastolic"] = int(diastolic)
-    else:
-        df = pd.concat([df, new_row], ignore_index=True)
-
-    st.session_state["blood_pressure_df"] = df.sort_values("date")
-    save_blood_pressure()
-
-
-def upsert_blood_sugar(entry_date, value):
-    df = st.session_state["blood_sugar_df"].copy()
-
-    entry_date = pd.to_datetime(entry_date).normalize()
-
-    if not df.empty:
-        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
-
-    existing_idx = df.index[df["date"] == entry_date].tolist() if not df.empty else []
-
-    new_row = pd.DataFrame(
-        [{
-            "date": entry_date,
-            "value": float(value),
-            "created_at": pd.Timestamp.now(),
-        }]
-    )
-
-    if existing_idx:
-        df.loc[existing_idx[0], "value"] = float(value)
-    else:
-        df = pd.concat([df, new_row], ignore_index=True)
-
-    st.session_state["blood_sugar_df"] = df.sort_values("date")
-    save_blood_sugar()
-
-
-def delete_blood_pressure(entry_date):
-    df = st.session_state["blood_pressure_df"].copy()
-
-    if not df.empty:
-        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
-        entry_date = pd.to_datetime(entry_date).normalize()
-        df = df[df["date"] != entry_date]
-        st.session_state["blood_pressure_df"] = df
-        save_blood_pressure()
-
-
-def delete_blood_sugar(entry_date):
-    df = st.session_state["blood_sugar_df"].copy()
-
-    if not df.empty:
-        df["date"] = pd.to_datetime(df["date"]).dt.normalize()
-        entry_date = pd.to_datetime(entry_date).normalize()
-        df = df[df["date"] != entry_date]
-        st.session_state["blood_sugar_df"] = df
-        save_blood_sugar()
-
-
-# -------------------------
-# Blutdruck-Tagebuch
-# -------------------------
-st.markdown("---")
-st.subheader("Mein Blutdruck-Tagebuch")
-
-with st.form("blood_pressure_form"):
-    bp_date = st.date_input("Datum", value=date.today(), key="bp_date")
-
-    c1, c2 = st.columns(2)
-    with c1:
-        bp_systolic = st.number_input(
-            "Systolisch (mmHg)",
-            min_value=50,
-            max_value=300,
-            value=120,
-            step=1,
-            key="bp_systolic"
-        )
-
-    with c2:
-        bp_diastolic = st.number_input(
-            "Diastolisch (mmHg)",
-            min_value=30,
-            max_value=200,
-            value=80,
-            step=1,
-            key="bp_diastolic"
-        )
-
-    bp_submit = st.form_submit_button("Blutdruck speichern")
-
-    if bp_submit:
-        upsert_blood_pressure(bp_date, bp_systolic, bp_diastolic)
-        st.success("Super! Der Blutdruckeintrag wurde gespeichert.")
-
-        # Warnlogik Blutdruck
-        if bp_systolic > 180 or bp_diastolic > 120 or bp_systolic < 80 or bp_diastolic < 50:
-            st.error("Kritischer Blutdruckwert. Bitte dringend ärztlich abklären.")
-        elif bp_systolic > 140 or bp_diastolic > 90 or bp_systolic < 90 or bp_diastolic < 60:
-            st.warning("Auffälliger Blutdruckwert. Bitte beobachten und gegebenenfalls ärztlich abklären.")
-
-bp_df = st.session_state["blood_pressure_df"].copy()
-
-if not bp_df.empty:
-    bp_df["date"] = pd.to_datetime(bp_df["date"])
-    bp_df = bp_df.sort_values("date")
-
-    bp_table = bp_df[["date", "systolic", "diastolic"]].copy()
-    bp_table["date"] = bp_table["date"].dt.strftime("%Y-%m-%d")
-    bp_table = bp_table.rename(
-        columns={
-            "date": "Datum",
-            "systolic": "Systolisch (mmHg)",
-            "diastolic": "Diastolisch (mmHg)",
-        }
-    )
-
-    st.dataframe(bp_table, use_container_width=True, hide_index=True)
-
-    bp_chart = bp_df[["date", "systolic", "diastolic"]].copy()
-    bp_chart = bp_chart.set_index("date")
-    st.line_chart(bp_chart, use_container_width=True)
-
-    with st.expander("Blutdruckeintrag löschen"):
-        bp_delete_options = bp_df["date"].dt.strftime("%Y-%m-%d").tolist()
-        bp_delete_date = st.selectbox(
-            "Welches Datum möchtest du löschen?",
-            options=bp_delete_options,
-            key="bp_delete_date"
-        )
-        if st.button("Blutdruckeintrag löschen", key="delete_bp_button"):
-            delete_blood_pressure(bp_delete_date)
-            st.success("Blutdruckeintrag wurde gelöscht.")
-            st.rerun()
-else:
-    st.info("Noch keine Blutdruckwerte eingetragen.")
-
-
-# -------------------------
-# Blutzucker-Tagebuch
-# -------------------------
-st.markdown("---")
-st.subheader("Mein Blutzucker-Tagebuch")
-
-with st.form("blood_sugar_form"):
-    bs_date = st.date_input("Datum", value=date.today(), key="bs_date")
-
-    bs_value = st.number_input(
-        "Blutzucker (mmol/l)",
-        min_value=0.0,
-        max_value=40.0,
-        value=5.5,
-        step=0.1,
-        format="%.1f",
-        key="bs_value"
-    )
-
-    bs_submit = st.form_submit_button("Blutzucker speichern")
-
-    if bs_submit:
-        upsert_blood_sugar(bs_date, bs_value)
-        st.success("Super! Der Blutzuckereintrag wurde gespeichert.")
-
-        # Warnlogik Blutzucker
-        if bs_value > 15 or bs_value < 3:
-            st.error("Kritischer Blutzuckerwert. Bitte dringend ärztlich abklären.")
-        elif bs_value > 10 or bs_value < 3.5:
-            st.warning("Auffälliger Blutzuckerwert. Bitte beobachten und gegebenenfalls ärztlich abklären.")
-
-bs_df = st.session_state["blood_sugar_df"].copy()
-
-if not bs_df.empty:
-    bs_df["date"] = pd.to_datetime(bs_df["date"])
-    bs_df = bs_df.sort_values("date")
-
-    bs_table = bs_df[["date", "value"]].copy()
-    bs_table["date"] = bs_table["date"].dt.strftime("%Y-%m-%d")
-    bs_table = bs_table.rename(
-        columns={
-            "date": "Datum",
-            "value": "Blutzucker (mmol/l)",
-        }
-    )
-
-    st.dataframe(bs_table, use_container_width=True, hide_index=True)
-
-    bs_chart = bs_df[["date", "value"]].copy()
-    bs_chart = bs_chart.set_index("date")
-    st.line_chart(bs_chart, use_container_width=True)
-
-    with st.expander("Blutzuckereintrag löschen"):
-        bs_delete_options = bs_df["date"].dt.strftime("%Y-%m-%d").tolist()
-        bs_delete_date = st.selectbox(
-            "Welches Datum möchtest du löschen?",
-            options=bs_delete_options,
-            key="bs_delete_date"
-        )
-        if st.button("Blutzuckereintrag löschen", key="delete_bs_button"):
-            delete_blood_sugar(bs_delete_date)
-            st.success("Blutzuckereintrag wurde gelöscht.")
-            st.rerun()
-else:
-    st.info("Noch keine Blutzuckerwerte eingetragen.")
