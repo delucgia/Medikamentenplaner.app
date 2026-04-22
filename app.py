@@ -14,7 +14,7 @@ st.set_page_config(page_title="MediTrack", page_icon="💊")
 # ---------------------------------------------------------
 data_manager = DataManager(
     fs_protocol="webdav",
-    fs_root_folder="BMLD"
+    fs_root_folder="MediTrack"
 )
 
 login_manager = LoginManager(data_manager)

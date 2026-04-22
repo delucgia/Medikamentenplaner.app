@@ -369,6 +369,7 @@ with st.sidebar:
 # Screens
 # =========================================================
 def screen_dashboard():
+    st.markdown('<div class="title-main"></div>', unsafe_allow_html=True) #Leere Zeile für Abstand
     st.markdown('<div class="title-main">MediTrack</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="muted">Behalte deine Medikamente und Einnahmen im Blick.</div>',
