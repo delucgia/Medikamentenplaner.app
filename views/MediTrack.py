@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-import json
 import os
 from datetime import date, datetime, time
+from utils.data_manager import DataManager
 
 st.set_page_config(page_title="MediTrack", page_icon="💊", layout="wide")
 
@@ -13,6 +13,8 @@ MEDICATIONS_FILE = "medications.json"
 INTAKES_FILE = "intakes.json"
 BLOOD_PRESSURE_FILE = "blood_pressure.json"
 BLOOD_SUGAR_FILE = "blood_sugar.json"
+
+data_manager = DataManager()
 
 DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 DAY_MAP = {
@@ -26,48 +28,47 @@ DAY_MAP = {
 }
 
 # =========================================================
-# Daten laden / speichern
-# =========================================================
-def load_data(filename):
-    if os.path.exists(filename):
-        with open(filename, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
-
-
-def save_data(filename, data):
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-# =========================================================
 # Session State
 # =========================================================
-if "page" not in st.session_state:
-    st.session_state.page = "dashboard"
 
-if "medications" not in st.session_state:
-    st.session_state.medications = load_data(MEDICATIONS_FILE)
+def initialize_session_state():
+    if "page" not in st.session_state:
+        st.session_state.page = "dashboard"
 
-if "intakes" not in st.session_state:
-    st.session_state.intakes = load_data(INTAKES_FILE)
+    if "medications" not in st.session_state:
+        try:
+            st.session_state.medications = data_manager.load_user_data(MEDICATIONS_FILE)
+        except Exception as e:
+            st.session_state.medications = []
 
-if "blood_pressure_entries" not in st.session_state:
-    st.session_state.blood_pressure_entries = load_data(BLOOD_PRESSURE_FILE)
+    if "intakes" not in st.session_state:
+        try:
+            st.session_state.intakes = data_manager.load_user_data(INTAKES_FILE)
+        except Exception as e:
+            st.session_state.intakes = []
 
-if "blood_sugar_entries" not in st.session_state:
-    st.session_state.blood_sugar_entries = load_data(BLOOD_SUGAR_FILE)
+    if "blood_pressure_entries" not in st.session_state:
+        try:
+            st.session_state.blood_pressure_entries = data_manager.load_user_data(BLOOD_PRESSURE_FILE)
+        except Exception as e:
+            st.session_state.blood_pressure_entries = []
 
-if "editing_medication_id" not in st.session_state:
-    st.session_state.editing_medication_id = None
+    if "blood_sugar_entries" not in st.session_state:
+        try:
+            st.session_state.blood_sugar_entries = data_manager.load_user_data(BLOOD_SUGAR_FILE)
+        except Exception as e:
+            st.session_state.blood_sugar_entries = []
 
-if "editing_intake_id" not in st.session_state:
-    st.session_state.editing_intake_id = None
+    if "editing_medication_id" not in st.session_state:
+        st.session_state.editing_medication_id = None
 
-if "last_success_message" not in st.session_state:
-    st.session_state.last_success_message = "Super!"
+    if "editing_intake_id" not in st.session_state:
+        st.session_state.editing_intake_id = None
 
+    if "last_success_message" not in st.session_state:
+        st.session_state.last_success_message = "Super!"
 
+initialize_session_state() 
 # =========================================================
 # Styling
 # =========================================================
@@ -199,7 +200,7 @@ def create_medication(name, med_time, days, note):
             "note": note.strip(),
         }
     )
-    save_data(MEDICATIONS_FILE, st.session_state.medications)
+    data_manager.save_user_data(st.session_state.medications, MEDICATIONS_FILE)
 
 
 def update_medication(med_id, name, med_time, days, note):
@@ -209,8 +210,8 @@ def update_medication(med_id, name, med_time, days, note):
         med["time"] = med_time.strftime("%H:%M")
         med["days"] = days
         med["note"] = note.strip()
-        save_data(MEDICATIONS_FILE, st.session_state.medications)
-
+        data_manager.save_user_data(st.session_state.medications, MEDICATIONS_FILE)
+ 
 
 def delete_medication(med_id):
     st.session_state.medications = [
@@ -219,8 +220,8 @@ def delete_medication(med_id):
     st.session_state.intakes = [
         i for i in st.session_state.intakes if i["medication_id"] != med_id
     ]
-    save_data(MEDICATIONS_FILE, st.session_state.medications)
-    save_data(INTAKES_FILE, st.session_state.intakes)
+    data_manager.save_user_data(st.session_state.medications, MEDICATIONS_FILE)
+    data_manager.save_user_data(st.session_state.intakes, INTAKES_FILE)
 
 
 # =========================================================
@@ -242,7 +243,7 @@ def create_intake(medication_id, intake_date, intake_time, confirmed, note):
             "note": note.strip(),
         }
     )
-    save_data(INTAKES_FILE, st.session_state.intakes)
+    data_manager.save_user_data(st.session_state.intakes, INTAKES_FILE)
 
 
 def update_intake(intake_id, medication_id, intake_date, intake_time, confirmed, note):
@@ -256,14 +257,14 @@ def update_intake(intake_id, medication_id, intake_date, intake_time, confirmed,
         intake["time"] = intake_time.strftime("%H:%M")
         intake["confirmed"] = confirmed
         intake["note"] = note.strip()
-        save_data(INTAKES_FILE, st.session_state.intakes)
+        data_manager.save_user_data(st.session_state.intakes, INTAKES_FILE)
 
 
 def delete_intake(intake_id):
     st.session_state.intakes = [
         i for i in st.session_state.intakes if i["id"] != intake_id
     ]
-    save_data(INTAKES_FILE, st.session_state.intakes)
+    data_manager.save_user_data(st.session_state.intakes, INTAKES_FILE)
 
 
 # =========================================================
@@ -291,7 +292,7 @@ def upsert_blood_pressure(entry_date, systolic, diastolic):
 
     entries.sort(key=lambda x: x["date"])
     st.session_state.blood_pressure_entries = entries
-    save_data(BLOOD_PRESSURE_FILE, entries)
+    data_manager.save_user_data(entries, BLOOD_PRESSURE_FILE)
 
 
 def upsert_blood_sugar(entry_date, value):
@@ -315,7 +316,7 @@ def upsert_blood_sugar(entry_date, value):
 
     entries.sort(key=lambda x: x["date"])
     st.session_state.blood_sugar_entries = entries
-    save_data(BLOOD_SUGAR_FILE, entries)
+    data_manager.save_user_data(entries, BLOOD_SUGAR_FILE)
 
 
 def delete_blood_pressure(entry_date_str):
@@ -323,7 +324,7 @@ def delete_blood_pressure(entry_date_str):
         entry for entry in st.session_state.blood_pressure_entries
         if entry["date"] != entry_date_str
     ]
-    save_data(BLOOD_PRESSURE_FILE, st.session_state.blood_pressure_entries)
+    data_manager.save_user_data(st.session_state.blood_pressure_entries, BLOOD_PRESSURE_FILE)
 
 
 def delete_blood_sugar(entry_date_str):
@@ -331,7 +332,7 @@ def delete_blood_sugar(entry_date_str):
         entry for entry in st.session_state.blood_sugar_entries
         if entry["date"] != entry_date_str
     ]
-    save_data(BLOOD_SUGAR_FILE, st.session_state.blood_sugar_entries)
+    data_manager.save_user_data(st.session_state.blood_sugar_entries, BLOOD_SUGAR_FILE)
 
 
 # =========================================================
@@ -566,7 +567,7 @@ def screen_intake_form():
 
 def screen_history():
     st.markdown("## Einnahmeverlauf")
-
+    
     if not st.session_state.intakes:
         st.info("Noch keine Einnahmen erfasst.")
         return
