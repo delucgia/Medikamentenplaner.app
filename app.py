@@ -19,6 +19,36 @@ login_manager = LoginManager(data_manager)
 login_manager.login_register()
 
 # ---------------------------------------------------------
+# Einstellungen laden (Sprache, Theme)
+# ---------------------------------------------------------
+if "settings_loaded" not in st.session_state:
+    try:
+        saved = data_manager.load_user_data("settings.json", initial_value={}) or {}
+        if saved.get("language"):
+            st.session_state["language"] = saved["language"]
+        if saved.get("theme"):
+            st.session_state["theme"] = saved["theme"]
+    except Exception:
+        pass
+    st.session_state["settings_loaded"] = True
+
+if "language" not in st.session_state:
+    st.session_state["language"] = "de"
+if "theme" not in st.session_state:
+    st.session_state["theme"] = "blue"
+
+# ---------------------------------------------------------
+# Profil laden
+# ---------------------------------------------------------
+if "profile" not in st.session_state:
+    try:
+        st.session_state["profile"] = data_manager.load_user_data(
+            "profile.json", initial_value={}
+        ) or {}
+    except Exception:
+        st.session_state["profile"] = {}
+
+# ---------------------------------------------------------
 # MediTrack-Daten pro User laden (CSV → DataFrame)
 # ---------------------------------------------------------
 if "medications_df" not in st.session_state:
@@ -43,18 +73,27 @@ if "intakes_df" not in st.session_state:
 if "blood_pressure_df" not in st.session_state:
     st.session_state["blood_pressure_df"] = data_manager.load_user_data(
         "blood_pressure.csv",
-        initial_value=pd.DataFrame(
-            columns=["date", "systolic", "diastolic"]
-        ),
+        initial_value=pd.DataFrame(columns=["date", "systolic", "diastolic"]),
     )
 
 if "blood_sugar_df" not in st.session_state:
     st.session_state["blood_sugar_df"] = data_manager.load_user_data(
         "blood_sugar.csv",
-        initial_value=pd.DataFrame(
-            columns=["date", "value"]
-        ),
+        initial_value=pd.DataFrame(columns=["date", "value"]),
     )
+
+if "mood_df" not in st.session_state:
+    try:
+        st.session_state["mood_df"] = data_manager.load_user_data(
+            "mood.csv",
+            initial_value=pd.DataFrame(
+                columns=["date", "mood_key", "mood_value", "mood_label", "note"]
+            ),
+        ) or pd.DataFrame(columns=["date", "mood_key", "mood_value", "mood_label", "note"])
+    except Exception:
+        st.session_state["mood_df"] = pd.DataFrame(
+            columns=["date", "mood_key", "mood_value", "mood_label", "note"]
+        )
 
 # Fehlende DataFrames abfangen
 for key, cols in [
@@ -62,6 +101,7 @@ for key, cols in [
     ("intakes_df",        ["id", "medication_id", "medication_name", "date", "time", "confirmed", "note", "created_at"]),
     ("blood_pressure_df", ["date", "systolic", "diastolic"]),
     ("blood_sugar_df",    ["date", "value"]),
+    ("mood_df",           ["date", "mood_key", "mood_value", "mood_label", "note"]),
 ]:
     if st.session_state[key] is None:
         st.session_state[key] = pd.DataFrame(columns=cols)
@@ -80,13 +120,35 @@ if "editing_intake_id" not in st.session_state:
 st.session_state["data_manager"] = data_manager
 
 # ---------------------------------------------------------
+# Theme + Übersetzung global laden — VOR pg.run()
+# damit Sidebar-Farbe auf allen Seiten gilt
+# ---------------------------------------------------------
+from utils.themes import inject_theme
+from utils.translations import t
+inject_theme()
+
+# ---------------------------------------------------------
 # Navigation
 # ---------------------------------------------------------
-pg_dashboard   = st.Page("views/dashboard.py",    title="Dashboard",   icon="🏠", default=True)
-pg_medikamente = st.Page("views/medikamente.py",  title="Medikamente", icon="💊")
-pg_verlauf     = st.Page("views/verlauf.py",       title="Verlauf",     icon="📋")
-pg_blutdruck   = st.Page("views/blutdruck.py",    title="Blutdruck",   icon="❤️")
-pg_blutzucker  = st.Page("views/blutzucker.py",   title="Blutzucker",  icon="🩸")
+pg_dashboard   = st.Page("views/dashboard.py",    title=t("nav_dashboard"),      icon="🏠", default=True)
+pg_medikamente = st.Page("views/medikamente.py",  title=t("nav_medications"),    icon="💊")
+pg_verlauf     = st.Page("views/verlauf.py",       title=t("nav_history"),        icon="📋")
+pg_blutdruck   = st.Page("views/blutdruck.py",    title=t("nav_blood_pressure"), icon="❤️")
+pg_blutzucker  = st.Page("views/blutzucker.py",   title=t("nav_blood_sugar"),    icon="🩸")
+pg_stimmung    = st.Page("views/stimmung.py",     title=t("nav_mood"),           icon="😊")
+pg_profil      = st.Page("views/profil.py",       title=t("nav_profile"),        icon="👤")
+pg_settings    = st.Page("views/einstellungen.py",title=t("nav_settings"),       icon="⚙️")
+pg_pdf         = st.Page("views/pdf_export.py",    title="PDF-Export",            icon="📄")
 
-pg = st.navigation([pg_dashboard, pg_medikamente, pg_verlauf, pg_blutdruck, pg_blutzucker])
+pg = st.navigation([
+    pg_dashboard,
+    pg_medikamente,
+    pg_verlauf,
+    pg_blutdruck,
+    pg_blutzucker,
+    pg_stimmung,
+    pg_profil,
+    pg_settings,
+    pg_pdf,
+])
 pg.run()
