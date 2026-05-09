@@ -199,7 +199,7 @@ if not intakes_df.empty:
     week_count = int((df_w["date_dt"] >= pd.Timestamp.today() - pd.Timedelta(days=6)).sum())
 
 streak_color = theme["primary"]
-streak_sub   = f"🔥 {streak} Tag{'e' if streak != 1 else ''} in Folge" if streak > 0 else "Noch kein Streak"
+streak_sub   = f"🔥 {streak} Tag{'e' if streak != 1 else ''} in Folge" if streak > 0 else t("no_streak")
 
 st.markdown(f"""
 <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1.25rem">
@@ -243,7 +243,7 @@ if meds_df.empty or todays_meds.empty:
 else:
     for _, med in todays_meds.sort_values("time").iterrows():
         already   = intake_exists_today(med["id"])
-        note_text = str(med["note"]).strip() if pd.notna(med.get("note")) and str(med.get("note","")).strip() else "keine Bemerkung"
+        note_text = str(med["note"]).strip() if pd.notna(med.get("note")) and str(med.get("note","")).strip() else t("no_note")
         icon_bg   = theme["pill_icon_bg"] if already else "#fffbeb"
         badge     = (f'<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600">{t("dashboard_confirmed")}</span>'
                      if already else
@@ -271,7 +271,7 @@ else:
                     save_intake(med["id"], med["name"], date.today(), str(med["time"]), True, "")
                     st.rerun()
         with c2:
-            if st.button("✏️ Bearbeiten", key=f"edit_{med['id']}", use_container_width=True):
+            if st.button(t("edit"), key=f"edit_{med['id']}", use_container_width=True):
                 st.session_state["editing_medication_id"] = int(med["id"])
                 st.switch_page("views/medikamente.py")
 
@@ -332,7 +332,7 @@ with col_right:
     else:
         with st.container(border=True):
             st.caption("❤️ BLUTDRUCK")
-            st.markdown("Noch kein Eintrag")
+            st.markdown(t("no_entry"))
 
     # Blutzucker — native Streamlit statt HTML
     if not bs_df.empty:
@@ -351,4 +351,4 @@ with col_right:
     else:
         with st.container(border=True):
             st.caption("🩸 NÜCHTERNBLUTZUCKER")
-            st.markdown("Noch kein Eintrag")
+            st.markdown(t("no_entry"))

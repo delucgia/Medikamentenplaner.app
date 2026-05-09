@@ -42,7 +42,7 @@ for i, (code, label) in enumerate(lang_options.items()):
         st.markdown(
             f'<div style="text-align:center;font-size:11px;'
             f'color:{theme["primary"] if is_sel else "#9ca3af"};margin-top:-8px">'
-            f'{"✓ Aktiv" if is_sel else ""}</div>',
+            f'{"✓ " + label.split(" ")[1] if is_sel else ""}</div>',
             unsafe_allow_html=True
         )
 
@@ -52,7 +52,6 @@ st.divider()
 st.markdown(f"#### 🎨 {t('settings_theme')}")
 current_theme = st.session_state.get("theme", "blue")
 
-# 3 Zeilen à 3 Themen
 theme_keys = list(THEMES.keys())
 rows = [theme_keys[i:i+3] for i in range(0, len(theme_keys), 3)]
 
@@ -68,7 +67,7 @@ for row in rows:
             color = th["primary"] if is_sel else "#9ca3af"
             st.markdown(
                 f'<div style="text-align:center;font-size:11px;color:{color};margin-top:-8px">'
-                f'{"✓ Aktiv" if is_sel else ""}</div>',
+                f'{"✓" if is_sel else ""}</div>',
                 unsafe_allow_html=True
             )
 
@@ -82,12 +81,11 @@ st.markdown(f"""
     <div style="font-size:2rem">{th_p['emoji']}</div>
     <div>
         <div style="font-size:15px;font-weight:600">{th_p['name']}</div>
-        <div style="font-size:12px;opacity:0.85">Aktuell ausgewähltes Thema</div>
+        <div style="font-size:12px;opacity:0.85">{t('settings_theme_current')}</div>
     </div>
     <div style="margin-left:auto;display:flex;gap:8px">
         <div style="width:24px;height:24px;border-radius:50%;background:{th_p['primary']}"></div>
         <div style="width:24px;height:24px;border-radius:50%;background:{th_p['accent']}"></div>
-        <div style="width:24px;height:24px;border-radius:50%;background:white;opacity:0.4"></div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -107,4 +105,4 @@ if st.button(t("save"), use_container_width=True):
         st.error(f"Fehler beim Speichern: {ex}")
     st.rerun()
 
-st.caption("Einstellungen werden pro Benutzer in der Cloud gespeichert.")
+st.caption(t("settings_cloud_note"))

@@ -82,15 +82,19 @@ if "blood_sugar_df" not in st.session_state:
         initial_value=pd.DataFrame(columns=["date", "value"]),
     )
 
-if "mood_df" not in st.session_state:
-    try:
-        st.session_state["mood_df"] = data_manager.load_user_data(
-            "mood.csv",
-            initial_value=pd.DataFrame(
-                columns=["date", "mood_key", "mood_value", "mood_label", "note"]
-            ),
-        ) or pd.DataFrame(columns=["date", "mood_key", "mood_value", "mood_label", "note"])
-    except Exception:
+# mood_df immer frisch laden (nicht cachen) damit neue Einträge nach Neustart sichtbar sind
+try:
+    loaded_mood = data_manager.load_user_data(
+        "mood.csv",
+        initial_value=pd.DataFrame(
+            columns=["date", "mood_key", "mood_value", "mood_label", "note"]
+        ),
+    )
+    st.session_state["mood_df"] = loaded_mood if loaded_mood is not None else pd.DataFrame(
+        columns=["date", "mood_key", "mood_value", "mood_label", "note"]
+    )
+except Exception as ex:
+    if "mood_df" not in st.session_state:
         st.session_state["mood_df"] = pd.DataFrame(
             columns=["date", "mood_key", "mood_value", "mood_label", "note"]
         )

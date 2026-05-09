@@ -6,6 +6,7 @@ Verwendet native Streamlit-Elemente statt komplexem HTML.
 
 import html
 import streamlit as st
+from utils.translations import t
 import pandas as pd
 from datetime import date, datetime, timedelta, time as dtime
 
@@ -67,6 +68,27 @@ st.write("")
 
 intakes_df = st.session_state["intakes_df"]
 meds_df    = st.session_state["medications_df"]
+
+# ── PDF-Export ────────────────────────────────────────────────────────────────
+col_title, col_pdf = st.columns([3, 1])
+with col_pdf:
+    if not intakes_df.empty:
+        if st.button("📄 PDF exportieren", use_container_width=True):
+            try:
+                from utils.pdf_export import generate_verlauf_pdf
+                profile = st.session_state.get("profile", {})
+                pdf_bytes = generate_verlauf_pdf(intakes_df, profile)
+                st.download_button(
+                    label="💾 PDF herunterladen",
+                    data=pdf_bytes,
+                    file_name="meditrack_verlauf.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
+            except ImportError:
+                st.error("fpdf2 nicht installiert. Bitte 'pip install fpdf2' ausführen.")
+            except Exception as ex:
+                st.error(f"Fehler beim Erstellen des PDFs: {ex}")
 
 tab_history, tab_stats, tab_form = st.tabs([
     "📅 Verlauf", "📊 Statistik", "➕ Einnahme erfassen / bearbeiten"

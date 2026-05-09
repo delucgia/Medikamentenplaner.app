@@ -19,8 +19,8 @@ DAYS = ["Mo","Di","Mi","Do","Fr","Sa","So"]
 def format_days(days_str):
     if not days_str or pd.isna(days_str): return "—"
     days = [d.strip() for d in str(days_str).split(",")]
-    if days == DAYS: return "Täglich"
-    if days == ["Mo","Di","Mi","Do","Fr"]: return "Mo–Fr"
+    if days == DAYS: return t("daily")
+    if days == ["Mo","Di","Mi","Do","Fr"]: return t("mo_fr")
     return ", ".join(days)
 
 def next_id(df):
@@ -97,7 +97,7 @@ with tab_form:
             editing_row = matches.iloc[0]
 
     if editing_row is not None:
-        st.markdown(f"**Bearbeite:** {editing_row['name']}")
+        st.markdown(f"**{t('edit_label')}:** {editing_row['name']}")
         if st.button("↩️ Abbrechen"):
             st.session_state["editing_medication_id"] = None
             st.rerun()
