@@ -29,51 +29,9 @@ Im Rahmen des Moduls Informatik 2 sollte eine praxisnahe Web-Applikation entwick
 
 ---
 
-## 3. Projektstruktur
+## 3. Funktionen im Detail
 
-```
-Medikamentenplaner.app-1/
-│
-├── docs/                               # Dokumentation
-│   ├── MVP-Reflexion.md
-│   ├── Persona.md
-│   ├── Produkt-Roadmap.md
-│   ├── Prozessdokumentation.md
-│   ├── Wireframe-Nutzertests.md
-│   └── Wireframes/                     # Wireframe-Skizzen und Storyboard
-│
-├── utils/                              # Hilfsmodule
-│   ├── __init__.py
-│   ├── data_handler.py                 # Daten-Handler
-│   ├── data_manager.py                 # SwitchDrive WebDAV – Daten laden und speichern
-│   ├── login_manager.py                # Login und Registrierung
-│   └── pdf_export.py                   # PDF-Generierung mit fpdf2
-│
-├── views/                              # Alle Seiten der App
-│   ├── blutdruck.py                    # Blutdruck-Tagebuch mit Plotly-Chart und Risikozonen
-│   ├── blutzucker.py                   # Blutzucker-Tagebuch mit Plotly-Chart
-│   ├── dashboard.py                    # Tagesübersicht mit Streak, Metriken, Gesundheitswerte
-│   ├── einstellungen.py                # Sprache und Farbthema wählen
-│   ├── home.py                         # Startseite / Landingpage
-│   ├── medikamente.py                  # Medikamentenverwaltung (CRUD)
-│   ├── pdf_export.py                   # PDF-Export-Seite mit Auswahl der Datenbereiche
-│   ├── profil.py                       # Persönliches Profil und Notfallkontakt
-│   ├── stimmung.py                     # Tagesstimmung mit Emoji-Skala und Verlaufschart
-│   └── verlauf.py                      # Einnahmeverlauf mit Statistik und Monatsgruppierung
-│
-├── .gitignore
-├── README.md
-├── app.py                              # Einstiegspunkt, Login, Navigation, Theme-Injection
-├── requirements.txt                    # Abhängigkeiten (streamlit, pandas, plotly, fpdf2)
-├── themes.py                           # 9 Farbthemen mit CSS-Injection
-└── translations.py                     # Übersetzungen DE/FR/IT/EN (130+ Keys pro Sprache)
-```
-
----
-
-## 4. Funktionen im Detail
-
-### 4.1 Dashboard
+### 3.1 Dashboard
 Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morgen/Mittag/Abend) und zeigt:
 
 - **Streak-Banner** – Wie viele Tage in Folge wurden alle Medikamente eingenommen? (motivierendes Feature mit Flammen-Emoji)
@@ -83,12 +41,12 @@ Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morg
 - **Einnahmetreue** – Pro Medikament ein Fortschrittsbalken (grün/orange/rot je nach Prozentsatz)
 - **Letzte Gesundheitswerte** – Letzter Blutdruck und Blutzucker mit Statusanzeige und Trend-Indikator (↑↓→)
 
-### 4.2 Medikamente
+### 3.2 Medikamente
 - Medikamente hinzufügen mit Name, Uhrzeit, Wochentagen (Multiselect) und Bemerkung
 - Bearbeiten und Löschen direkt in der Übersicht
 - Wochentage werden intern immer als DE-Kürzel gespeichert (Mo, Di, ...) und in der jeweiligen Sprache angezeigt
 
-### 4.3 Einnahmeverlauf
+### 3.3 Einnahmeverlauf
 - Chronologisch gruppiert: Monat → Kalenderwoche → Tag
 - Farbige Punkte: Grün = bestätigt, Rot = nicht bestätigt
 - Filter nach Zeitraum und Medikament
@@ -96,7 +54,7 @@ Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morg
 - Tab zum manuellen Erfassen und Bearbeiten von Einnahmen
 - PDF-Export-Button direkt im Verlauf
 
-### 4.4 Blutdruck-Tagebuch
+### 3.4 Blutdruck-Tagebuch
 - Eingabe von systolischem und diastolischem Wert
 - Klassifizierung nach **DGK-Leitlinien** (Deutsche Gesellschaft für Kardiologie):
   - Hypotonie / Optimal / Normal / Hoch-normal / Hypertonie Grad 1–3
@@ -108,13 +66,13 @@ Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morg
 - Handlungsempfehlungen in ganzen Sätzen (auf Deutsch, mit Disclaimer in anderen Sprachen)
 - Referenzwerte-Tabelle und Sonderfälle-Tabelle als Expander
 
-### 4.5 Blutzucker-Tagebuch
+### 3.5 Blutzucker-Tagebuch
 - Nüchternblutzucker in mmol/l (morgens vor dem Essen)
 - Klassifizierung: Normal / Auffällig tief / Auffällig hoch / Kritisch tief / Kritisch hoch
 - Plotly-Chart mit 6 Risikozonen und farbigen Messpunkten
 - Handlungsempfehlungen analog zum Blutdruck
 
-### 4.6 Tagesstimmung
+### 3.6 Tagesstimmung
 - 5 Stufen mit Emoji-Skala: 😄 Sehr gut / 🙂 Gut / 😐 Okay / 😕 Schlecht / 😞 Sehr schlecht
 - Optionaler Freitext-Kommentar
 - Heutiger Eintrag wird oben als Banner angezeigt
@@ -122,19 +80,19 @@ Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morg
 - Letzte 7 Einträge als Karten
 - Löschfunktion via Expander
 
-### 4.7 Profil
+### 3.7 Profil
 - 3 Tabs: Persönlich / Medizinisch / Notfall
 - Geburtsdatum als 3 separate Zahlenfelder (Jahr 1900 bis heute, kein Streamlit-Limit)
 - Initialen-Avatar mit Theme-Gradient
 - Gespeicherte Angaben als strukturierte Übersicht
 
-### 4.8 Einstellungen
+### 3.8 Einstellungen
 - **4 Sprachen:** 🇩🇪 Deutsch / 🇫🇷 Français / 🇮🇹 Italiano / 🇬🇧 English
 - **9 Farbthemen:** Ozean-Blau, Lila, Smaragd, Rosa, Sonnenschein, Türkis, Himmelblau, Minze, Lavendel
 - Farbvorschau-Banner mit Gradient
 - Einstellungen werden in `settings.json` pro User auf SwitchDrive gespeichert
 
-### 4.9 PDF-Export
+### 3.9 PDF-Export
 - Eigene Seite in der Sidebar
 - Checkboxen für jeden Bereich: Einnahmen / Blutdruck / Blutzucker / Stimmung
 - Zeigt Anzahl verfügbarer Einträge
@@ -145,9 +103,9 @@ Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morg
 
 ---
 
-## 5. Technische Umsetzung
+## 4. Technische Umsetzung
 
-### 5.1 Datenspeicherung
+### 4.1 Datenspeicherung
 
 Alle Daten werden pro Benutzer in der **SwitchDrive-Cloud** via WebDAV gespeichert. Die Struktur:
 
@@ -161,7 +119,7 @@ Alle Daten werden pro Benutzer in der **SwitchDrive-Cloud** via WebDAV gespeiche
 | `profile.json` | firstname, lastname, birthdate, doctor, emergency, emergency_phone, blood_type, allergies |
 | `settings.json` | language, theme |
 
-### 5.2 Mehrsprachigkeit
+### 4.2 Mehrsprachigkeit
 
 Die Übersetzungen sind in `utils/translations.py` strukturiert. Jede Sprache hat ein Dictionary mit über 130 Keys. Die Funktion `t(key)` gibt den übersetzten Text zurück, mit Deutsch als Fallback.
 
@@ -176,7 +134,7 @@ def t(key: str) -> str:
 
 **Designentscheidung:** Medizinische Handlungsempfehlungen (Notfallhinweise, detaillierte Anweisungen) bleiben auf Deutsch, da eine falsche Übersetzung gesundheitliche Risiken darstellen könnte. In anderen Sprachen erscheint ein Disclaimer-Hinweis.
 
-### 5.3 Theme-System
+### 4.3 Theme-System
 
 Das Theme-System in `utils/themes.py` definiert 9 Farbthemen mit je 12 Attributen (Primärfarbe, Gradient, Sidebar-Hintergrund, etc.). `inject_theme()` wird in `app.py` **vor** `pg.run()` aufgerufen, damit das CSS global für alle Seiten gilt – einschliesslich der Sidebar.
 
@@ -187,7 +145,7 @@ inject_theme()
 pg.run()
 ```
 
-### 5.4 Streak-Berechnung
+### 4.4 Streak-Berechnung
 
 Der Streak wird rückwärts von heute berechnet. Für jeden Tag wird geprüft, ob alle fälligen Medikamente bestätigt wurden. Tage ohne fällige Medikamente werden übersprungen.
 
@@ -207,13 +165,13 @@ def compute_streak():
     return streak
 ```
 
-### 5.5 Trend-Analyse
+### 4.5 Trend-Analyse
 
 Die Trend-Analyse für Blutdruck und Blutzucker vergleicht den Durchschnitt der ersten und zweiten Hälfte der letzten 7 Messungen. Liegt die Differenz unter 30% der Standardabweichung, gilt der Wert als stabil.
 
 ---
 
-## 6. Design-Entscheidungen
+## 5. Design-Entscheidungen
 
 | Entscheidung | Begründung |
 |---|---|
@@ -227,7 +185,7 @@ Die Trend-Analyse für Blutdruck und Blutzucker vergleicht den Durchschnitt der 
 
 ---
 
-## 7. Herausforderungen und Lösungen
+## 6. Herausforderungen und Lösungen
 
 ### Herausforderung 1: Sidebar-Farbe übernimmt Theme nicht
 **Problem:** Das CSS-Theme wurde nur auf der aktuellen Seite angewendet, die Sidebar blieb immer grau.  
@@ -251,7 +209,7 @@ Die Trend-Analyse für Blutdruck und Blutzucker vergleicht den Durchschnitt der 
 
 ---
 
-## 8. Verwendete Bibliotheken
+## 7. Verwendete Bibliotheken
 
 | Bibliothek | Version | Verwendung |
 |---|---|---|
@@ -263,7 +221,7 @@ Die Trend-Analyse für Blutdruck und Blutzucker vergleicht den Durchschnitt der 
 
 ---
 
-## 9. Reflexion
+## 8. Reflexion
 
 ### Was gut funktioniert hat
 - Das modulare Aufbau mit separaten Views und Utils-Modulen macht den Code gut wartbar
@@ -284,7 +242,7 @@ Die Trend-Analyse für Blutdruck und Blutzucker vergleicht den Durchschnitt der 
 
 ---
 
-## 10. Fazit
+## 9. Fazit
 
 MediTrack ist eine vollständig funktionsfähige, professionell gestaltete Gesundheits-App, die weit über eine einfache CRUD-Applikation hinausgeht. Die Kombination aus medizinisch korrekten Klassifizierungen, mehrsprachiger Benutzeroberfläche, personalisiertem Design und Cloud-Datenspeicherung macht sie zu einer echten, praxistauglichen Anwendung.
 
