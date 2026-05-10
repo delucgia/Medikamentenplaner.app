@@ -61,7 +61,8 @@ for row in rows:
         th = THEMES[key]
         with cols[i]:
             is_sel = current_theme == key
-            if st.button(f"{th['emoji']} {th['name']}", key=f"theme_{key}", use_container_width=True):
+            theme_name = t(th["name_key"]) if "name_key" in th else th["name"]
+            if st.button(f"{th['emoji']} {theme_name}", key=f"theme_{key}", use_container_width=True):
                 st.session_state["theme"] = key
                 st.rerun()
             color = th["primary"] if is_sel else "#9ca3af"
@@ -80,7 +81,7 @@ st.markdown(f"""
             color:white;display:flex;align-items:center;gap:12px;margin-bottom:1rem">
     <div style="font-size:2rem">{th_p['emoji']}</div>
     <div>
-        <div style="font-size:15px;font-weight:600">{th_p['name']}</div>
+        <div style="font-size:15px;font-weight:600">{t(th_p["name_key"]) if "name_key" in th_p else th_p["name"]}</div>
         <div style="font-size:12px;opacity:0.85">{t('settings_theme_current')}</div>
     </div>
     <div style="margin-left:auto;display:flex;gap:8px">

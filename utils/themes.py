@@ -6,7 +6,7 @@ inject_theme() wird in app.py einmalig aufgerufen und gilt für alle Seiten.
 
 THEMES = {
     "blue": {
-        "name": "Ozean-Blau", "emoji": "🌊",
+        "name": "Ozean-Blau", "name_key": "theme_ocean", "emoji": "🌊",
         "primary": "#2563eb", "primary_light": "#eff6ff", "primary_text": "#1d4ed8",
         "accent": "#0ea5e9", "bg": "#f4f6fb", "card": "#ffffff", "border": "#e5e7eb",
         "pill_icon_bg": "#eff6ff", "metric_bg": "#f9fafb",
@@ -14,7 +14,7 @@ THEMES = {
         "gradient": "linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%)",
     },
     "purple": {
-        "name": "Lila", "emoji": "💜",
+        "name": "Lila", "name_key": "theme_purple", "emoji": "💜",
         "primary": "#7c3aed", "primary_light": "#f5f3ff", "primary_text": "#6d28d9",
         "accent": "#a78bfa", "bg": "#faf5ff", "card": "#ffffff", "border": "#e9d5ff",
         "pill_icon_bg": "#f5f3ff", "metric_bg": "#faf5ff",
@@ -22,7 +22,7 @@ THEMES = {
         "gradient": "linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)",
     },
     "green": {
-        "name": "Smaragd", "emoji": "🌿",
+        "name": "Smaragd", "name_key": "theme_emerald", "emoji": "🌿",
         "primary": "#059669", "primary_light": "#ecfdf5", "primary_text": "#047857",
         "accent": "#34d399", "bg": "#f0fdf4", "card": "#ffffff", "border": "#d1fae5",
         "pill_icon_bg": "#ecfdf5", "metric_bg": "#f0fdf4",
@@ -30,7 +30,7 @@ THEMES = {
         "gradient": "linear-gradient(135deg, #059669 0%, #34d399 100%)",
     },
     "rose": {
-        "name": "Rosa", "emoji": "🌹",
+        "name": "Rosa", "name_key": "theme_rose", "emoji": "🌹",
         "primary": "#e11d48", "primary_light": "#fff1f2", "primary_text": "#be123c",
         "accent": "#fb7185", "bg": "#fff5f7", "card": "#ffffff", "border": "#fecdd3",
         "pill_icon_bg": "#fff1f2", "metric_bg": "#fff5f7",
@@ -38,7 +38,7 @@ THEMES = {
         "gradient": "linear-gradient(135deg, #e11d48 0%, #fb7185 100%)",
     },
     "orange": {
-        "name": "Sonnenschein", "emoji": "🌅",
+        "name": "Sonnenschein", "name_key": "theme_sunshine", "emoji": "🌅",
         "primary": "#ea580c", "primary_light": "#fff7ed", "primary_text": "#c2410c",
         "accent": "#fb923c", "bg": "#fff7ed", "card": "#ffffff", "border": "#fed7aa",
         "pill_icon_bg": "#fff7ed", "metric_bg": "#fff7ed",
@@ -46,7 +46,7 @@ THEMES = {
         "gradient": "linear-gradient(135deg, #ea580c 0%, #fb923c 100%)",
     },
     "teal": {
-        "name": "Türkis", "emoji": "🩵",
+        "name": "Türkis", "name_key": "theme_teal", "emoji": "🩵",
         "primary": "#0d9488", "primary_light": "#f0fdfa", "primary_text": "#0f766e",
         "accent": "#2dd4bf", "bg": "#f0fdfa", "card": "#ffffff", "border": "#99f6e4",
         "pill_icon_bg": "#f0fdfa", "metric_bg": "#f0fdfa",
@@ -54,7 +54,7 @@ THEMES = {
         "gradient": "linear-gradient(135deg, #0d9488 0%, #2dd4bf 100%)",
     },
     "sky": {
-        "name": "Himmelblau", "emoji": "☀️",
+        "name": "Himmelblau", "name_key": "theme_sky", "emoji": "☀️",
         "primary": "#0284c7", "primary_light": "#f0f9ff", "primary_text": "#0369a1",
         "accent": "#38bdf8", "bg": "#f0f9ff", "card": "#ffffff", "border": "#bae6fd",
         "pill_icon_bg": "#e0f2fe", "metric_bg": "#f0f9ff",
@@ -62,7 +62,7 @@ THEMES = {
         "gradient": "linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)",
     },
     "mint": {
-        "name": "Minze", "emoji": "🌱",
+        "name": "Minze", "name_key": "theme_mint", "emoji": "🌱",
         "primary": "#16a34a", "primary_light": "#f0fdf4", "primary_text": "#15803d",
         "accent": "#4ade80", "bg": "#f7fef9", "card": "#ffffff", "border": "#bbf7d0",
         "pill_icon_bg": "#dcfce7", "metric_bg": "#f0fdf4",
@@ -70,7 +70,7 @@ THEMES = {
         "gradient": "linear-gradient(135deg, #16a34a 0%, #4ade80 100%)",
     },
     "lavender": {
-        "name": "Lavendel", "emoji": "🪻",
+        "name": "Lavendel", "name_key": "theme_lavender", "emoji": "🪻",
         "primary": "#8b5cf6", "primary_light": "#f5f3ff", "primary_text": "#7c3aed",
         "accent": "#c4b5fd", "bg": "#faf9ff", "card": "#ffffff", "border": "#ddd6fe",
         "pill_icon_bg": "#ede9fe", "metric_bg": "#f5f3ff",

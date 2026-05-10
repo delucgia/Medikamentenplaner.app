@@ -165,18 +165,38 @@ else:
         </tr></thead><tbody>{rows_html}</tbody></table></div>""", unsafe_allow_html=True)
 
     with st.expander(f"ℹ️ {t('bs_ref_title')}"):
+        ref_meanings = {
+            "de": ["Gesunder Nüchternwert", "Zu tief, beobachten", "Möglicher Prädiabetes", "Hypoglykämie – sofort handeln", "Diabetes-Verdacht – ärztlich abklären"],
+            "fr": ["Valeur à jeun saine", "Trop bas, surveiller", "Possible prédiabète", "Hypoglycémie – agir immédiatement", "Suspicion de diabète – consulter un médecin"],
+            "it": ["Valore a digiuno sano", "Troppo basso, monitorare", "Possibile prediabete", "Ipoglicemia – agire subito", "Sospetto diabete – consultare un medico"],
+            "en": ["Healthy fasting value", "Too low, monitor", "Possible prediabetes", "Hypoglycemia – act immediately", "Suspected diabetes – see a doctor"],
+        }
+        lang = st.session_state.get("language", "de")
+        meanings = ref_meanings.get(lang, ref_meanings["de"])
+        fasting_note = {
+            "de": "Diese Werte gelten für den **Nüchternblutzucker** (mind. 8h ohne Nahrung).",
+            "fr": "Ces valeurs s'appliquent à la **glycémie à jeun** (min. 8h sans nourriture).",
+            "it": "Questi valori si riferiscono alla **glicemia a digiuno** (min. 8h senza cibo).",
+            "en": "These values apply to **fasting blood sugar** (min. 8h without food).",
+        }.get(lang, "")
+        source = {
+            "de": "Deutsche Diabetes Gesellschaft / Helios Gesundheit",
+            "fr": "Société Allemande du Diabète / Helios Santé",
+            "it": "Società Tedesca del Diabete / Helios Salute",
+            "en": "German Diabetes Society / Helios Health",
+        }.get(lang, "")
         st.markdown(f"""
-> ⚠️ Diese Werte gelten für den **Nüchternblutzucker** (mind. 8h ohne Nahrung).
+> ⚠️ {fasting_note}
 
-| {t('status')} | mmol/l | Bedeutung |
+| {t('status')} | mmol/l | {t('ref_meaning')} |
 |---|---|---|
-| 🟢 {t('bs_normal')} | 3.9–5.5 | Gesunder Nüchternwert |
-| 🟡 {t('bs_warn_low')} | 3.0–3.9 | Zu tief, beobachten |
-| 🟠 {t('bs_warn_high')} | 5.6–7.0 | Möglicher Prädiabetes |
-| 🔴 {t('bs_crit_low')} | < 3.0 | Hypoglykämie |
-| 🔴 {t('bs_crit_high')} | ≥ 7.0 | Diabetes-Verdacht |
+| 🟢 {t('bs_normal')} | 3.9–5.5 | {meanings[0]} |
+| 🟡 {t('bs_warn_low')} | 3.0–3.9 | {meanings[1]} |
+| 🟠 {t('bs_warn_high')} | 5.6–7.0 | {meanings[2]} |
+| 🔴 {t('bs_crit_low')} | < 3.0 | {meanings[3]} |
+| 🔴 {t('bs_crit_high')} | ≥ 7.0 | {meanings[4]} |
 
-*Deutsche Diabetes Gesellschaft / Helios Gesundheit*
+*{source}*
         """)
 
     with st.expander(f"🗑️ {t('bs_delete')}"):

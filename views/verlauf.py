@@ -1,118 +1,139 @@
 """
 views/verlauf.py
 Einnahmeverlauf: Gruppiert nach Monat → Woche → Tag.
-Verwendet native Streamlit-Elemente statt komplexem HTML.
+Vollständig übersetzt via utils/translations.py
 """
 
 import html
 import streamlit as st
-from utils.translations import t
 import pandas as pd
 from datetime import date, datetime, timedelta, time as dtime
+from utils.translations import t
+from utils.themes import get_theme
 
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
-html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
-.week-label { font-size: 12px; font-weight: 600; color: #6b7280; letter-spacing: 0.03em; margin: 0.5rem 0 0.3rem; }
-.day-label  { font-size: 13px; font-weight: 600; color: #374151; margin: 0.6rem 0 0.2rem; display: flex; align-items: center; gap: 8px; }
-.day-date   { font-size: 12px; color: #9ca3af; font-weight: 400; }
-.day-count  { font-size: 11px; color: #9ca3af; margin-left: auto; }
-.intake-card {
-    background: white; border: 1px solid #e5e7eb; border-radius: 12px;
-    padding: 0.55rem 1rem; margin-bottom: 0.35rem;
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-}
-.intake-left { display: flex; align-items: center; gap: 8px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.dot-green { background: #22c55e; }
-.dot-red   { background: #ef4444; }
-.intake-name { font-size: 13px; font-weight: 500; color: #111827; }
-.intake-note { font-size: 11px; color: #9ca3af; }
-.intake-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.time-tag { font-size: 11px; background: #f3f4f6; color: #6b7280; padding: 2px 7px; border-radius: 6px; font-weight: 500; }
-.ok-badge  { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #dcfce7; color: #15803d; font-weight: 600; }
-.no-badge  { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #fee2e2; color: #b91c1c; font-weight: 600; }
-div.stButton > button { border-radius: 10px; font-weight: 600; min-height: 36px; font-size: 12px; }
-</style>""", unsafe_allow_html=True)
+theme = get_theme()
 
-def e(t): return html.escape(str(t))
+
+def e(text):
+    return html.escape(str(text))
+
+
+DAYS_ALL = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+
+
+def get_weekday_name(weekday_int):
+    """Gibt den übersetzten Wochentagnamen zurück."""
+    return t("weekdays_long").split(",")[weekday_int]
+
+
+def get_month_name(month_int):
+    """Gibt den übersetzten Monatsnamen zurück."""
+    return t("months").split(",")[month_int - 1]
+
+
+def format_days(days_str):
+    """Formatiert den days-String (DE-intern) in die aktuelle Sprache."""
+    if not days_str or pd.isna(days_str):
+        return "—"
+    days = [d.strip() for d in str(days_str).split(",")]
+    if days == DAYS_ALL:
+        return t("daily")
+    if days == ["Mo", "Di", "Mi", "Do", "Fr"]:
+        return t("mo_fr")
+    shorts_de         = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+    shorts_translated = t("weekdays_short").split(",")
+    mapped = [
+        shorts_translated[shorts_de.index(d)] if d in shorts_de else d
+        for d in days
+    ]
+    return ", ".join(mapped)
+
 
 def is_confirmed(val):
     return str(val).strip().lower() in ["true", "1", "yes"]
+
 
 def next_id(df):
     if df.empty or "id" not in df.columns:
         return 1
     return int(df["id"].max()) + 1
 
+
 def save_intakes():
-    st.session_state["data_manager"].save_user_data(st.session_state["intakes_df"], "intakes.csv")
+    st.session_state["data_manager"].save_user_data(
+        st.session_state["intakes_df"], "intakes.csv"
+    )
+
 
 def get_week_range(dt):
     monday = dt - timedelta(days=dt.weekday())
     sunday = monday + timedelta(days=6)
     return monday, sunday
 
-WEEKDAYS_DE = {0:"Montag", 1:"Dienstag", 2:"Mittwoch", 3:"Donnerstag",
-               4:"Freitag", 5:"Samstag", 6:"Sonntag"}
-MONTHS_DE   = {1:"Januar", 2:"Februar", 3:"März", 4:"April", 5:"Mai",
-               6:"Juni", 7:"Juli", 8:"August", 9:"September",
-               10:"Oktober", 11:"November", 12:"Dezember"}
 
 # ── Seite ─────────────────────────────────────────────────────────────────────
-st.markdown("## 📋 Einnahmeverlauf")
-st.markdown('<p style="color:#6b7280">Alle erfassten Einnahmen – nach Monat, Woche und Tag gegliedert.</p>',
-            unsafe_allow_html=True)
+st.markdown(f"## 📋 {t('history_title')}")
+st.markdown(
+    f'<p style="color:#6b7280">{t("history_subtitle")}</p>',
+    unsafe_allow_html=True
+)
 st.write("")
 
 intakes_df = st.session_state["intakes_df"]
 meds_df    = st.session_state["medications_df"]
 
-# ── PDF-Export ────────────────────────────────────────────────────────────────
+# ── PDF-Export ─────────────────────────────────────────────────────────────────
 col_title, col_pdf = st.columns([3, 1])
 with col_pdf:
     if not intakes_df.empty:
-        if st.button("📄 PDF exportieren", use_container_width=True):
+        if st.button("📄 PDF", use_container_width=True):
             try:
-                from utils.pdf_export import generate_verlauf_pdf
-                profile = st.session_state.get("profile", {})
-                pdf_bytes = generate_verlauf_pdf(intakes_df, profile)
+                from utils.pdf_export import generate_pdf
+                profile   = st.session_state.get("profile", {})
+                pdf_bytes = generate_pdf(
+                    profile=profile,
+                    include_intakes=True,
+                    intakes_df=intakes_df
+                )
                 st.download_button(
-                    label="💾 PDF herunterladen",
+                    label=t("pdf_download"),
                     data=pdf_bytes,
                     file_name="meditrack_verlauf.pdf",
                     mime="application/pdf",
-                    use_container_width=True,
+                    use_container_width=True
                 )
-            except ImportError:
-                st.error("fpdf2 nicht installiert. Bitte 'pip install fpdf2' ausführen.")
             except Exception as ex:
-                st.error(f"Fehler beim Erstellen des PDFs: {ex}")
+                st.error(f"{ex}")
 
 tab_history, tab_stats, tab_form = st.tabs([
-    "📅 Verlauf", "📊 Statistik", "➕ Einnahme erfassen / bearbeiten"
+    f"📅 {t('history_title')}",
+    f"📊 {t('history_stats')}",
+    f"➕ {t('history_form')}"
 ])
 
-# ── Tab 1: Verlauf ─────────────────────────────────────────────────────────────
+# ── Tab 1: Verlauf ────────────────────────────────────────────────────────────
 with tab_history:
     if intakes_df.empty:
-        st.info("Noch keine Einnahmen erfasst.")
+        st.info(t("history_none"))
     else:
         df = intakes_df.copy()
         df["date_parsed"] = pd.to_datetime(df["date"], errors="coerce")
         df = df.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
 
-        with st.expander("🔍 Filter", expanded=False):
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                filter_from = st.date_input("Von", value=date.today() - timedelta(days=29), key="hist_from")
-            with c2:
-                filter_to   = st.date_input("Bis", value=date.today(), key="hist_to")
-            with c3:
-                med_names  = ["Alle"] + sorted(df["medication_name"].dropna().unique().tolist())
-                filter_med = st.selectbox("Medikament", options=med_names, key="hist_med")
-            show_all = st.checkbox("Gesamten Verlauf anzeigen", value=False)
+        with st.expander(f"🔍 {t('filter_label')}", expanded=False):
+            col_from, col_to, col_med = st.columns([2, 2, 2])
+            with col_from:
+                filter_from = st.date_input(
+                    t("history_from"),
+                    value=date.today() - timedelta(days=29),
+                    key="hf"
+                )
+            with col_to:
+                filter_to = st.date_input(t("history_to"), value=date.today(), key="ht")
+            with col_med:
+                med_options = ["All"] + sorted(df["medication_name"].dropna().unique().tolist())
+                filter_med  = st.selectbox(t("med_title"), options=med_options, key="hm")
+            show_all = st.checkbox(t("show_all_label"), value=False)
 
         filtered = df.copy()
         if not show_all:
@@ -120,199 +141,267 @@ with tab_history:
                 (filtered["date_parsed"].dt.date >= filter_from) &
                 (filtered["date_parsed"].dt.date <= filter_to)
             ]
-        if filter_med != "Alle":
+        if filter_med != "All":
             filtered = filtered[filtered["medication_name"] == filter_med]
 
-        if filtered.empty:
-            st.info("Keine Einnahmen im gewählten Zeitraum.")
-        else:
-            st.caption(f"{len(filtered)} Einträge gefunden")
+        st.caption(f"{len(filtered)} {t('entries_found')}")
+        st.write("")
 
+        if filtered.empty:
+            st.info(t("no_intakes_period"))
+        else:
             filtered["year_month"] = filtered["date_parsed"].dt.to_period("M")
             filtered["iso_week"]   = filtered["date_parsed"].dt.isocalendar().week.astype(int)
             filtered["iso_year"]   = filtered["date_parsed"].dt.isocalendar().year.astype(int)
 
-            for ym, month_group in filtered.groupby("year_month", sort=False):
-                month_dt    = ym.to_timestamp()
-                month_label = f"{MONTHS_DE[month_dt.month]} {month_dt.year}"
-                month_count = len(month_group)
+            for year_month, month_group in filtered.groupby("year_month", sort=False):
+                month_dt = year_month.to_timestamp()
+                month_name = get_month_name(month_dt.month)
+                entry_count = len(month_group)
 
-                st.markdown(f"### 📅 {month_label} &nbsp; <span style='font-size:13px;color:#9ca3af;font-weight:400'>{month_count} Einnahmen</span>",
-                            unsafe_allow_html=True)
+                st.markdown(
+                    f"### 📅 {month_name} {month_dt.year} &nbsp;"
+                    f'<span style="font-size:13px;color:#9ca3af;font-weight:400">'
+                    f'{entry_count} {t("intakes")}</span>',
+                    unsafe_allow_html=True
+                )
 
                 for (iso_year, iso_week), week_group in month_group.groupby(
                     ["iso_year", "iso_week"], sort=False
                 ):
-                    first_day      = week_group["date_parsed"].max().date()
+                    first_day = week_group["date_parsed"].max().date()
                     monday, sunday = get_week_range(first_day)
-                    week_label     = f"KW {iso_week}  ·  {monday.strftime('%d. %b')} – {sunday.strftime('%d. %b')}"
-
-                    st.markdown(f'<div class="week-label">📆 {e(week_label)}</div>', unsafe_allow_html=True)
+                    week_label = (
+                        f"{t('week_abbr')} {iso_week}  ·  "
+                        f"{monday.strftime('%d. %b')} – {sunday.strftime('%d. %b')}"
+                    )
+                    st.markdown(
+                        f'<div style="font-size:12px;font-weight:600;color:#6b7280;'
+                        f'margin:0.5rem 0 0.3rem">{e(week_label)}</div>',
+                        unsafe_allow_html=True
+                    )
 
                     for day_date, day_group in week_group.groupby(
                         week_group["date_parsed"].dt.date, sort=False
                     ):
-                        day_group = day_group.sort_values("time")
-                        wd        = WEEKDAYS_DE[day_date.weekday()]
-                        day_count = len(day_group)
+                        day_group      = day_group.sort_values("time")
+                        weekday_name   = get_weekday_name(day_date.weekday())
+                        day_count      = len(day_group)
+                        intake_word    = t("intake") if day_count == 1 else t("intakes")
 
                         st.markdown(
-                            f'<div class="day-label">'
-                            f'{e(wd)} <span class="day-date">{day_date.strftime("%d.%m.%Y")}</span>'
-                            f'<span class="day-count">{day_count} Einnahme{"n" if day_count != 1 else ""}</span>'
-                            f'</div>',
+                            f'<div style="font-size:13px;font-weight:600;color:#374151;'
+                            f'margin:0.6rem 0 0.2rem;display:flex;align-items:center;gap:8px">'
+                            f'{e(weekday_name)} '
+                            f'<span style="font-size:12px;color:#9ca3af;font-weight:400">'
+                            f'{day_date.strftime("%d.%m.%Y")}</span>'
+                            f'<span style="font-size:11px;color:#9ca3af;margin-left:auto">'
+                            f'{day_count} {intake_word}</span></div>',
                             unsafe_allow_html=True
                         )
 
                         for _, intake in day_group.iterrows():
-                            confirmed  = is_confirmed(intake.get("confirmed", False))
-                            dot_cls    = "dot-green" if confirmed else "dot-red"
-                            badge_cls  = "ok-badge" if confirmed else "no-badge"
-                            badge_text = "✓ Bestätigt" if confirmed else "✗ Nicht bestätigt"
-                            note_text  = str(intake["note"]).strip() if pd.notna(intake.get("note")) and str(intake.get("note", "")).strip() else ""
-                            note_html  = f'<div class="intake-note">{e(note_text)}</div>' if note_text else ""
+                            confirmed = is_confirmed(intake.get("confirmed", False))
+                            dot_color = "#22c55e" if confirmed else "#ef4444"
 
-                            st.markdown(
-                                f'<div class="intake-card">'
-                                f'  <div class="intake-left">'
-                                f'    <div class="dot {dot_cls}"></div>'
-                                f'    <div><div class="intake-name">{e(str(intake["medication_name"]))}</div>{note_html}</div>'
-                                f'  </div>'
-                                f'  <div class="intake-right">'
-                                f'    <span class="time-tag">{e(str(intake["time"]))}</span>'
-                                f'    <span class="{badge_cls}">{badge_text}</span>'
-                                f'  </div>'
-                                f'</div>',
-                                unsafe_allow_html=True
+                            if confirmed:
+                                badge_html = (
+                                    f'<span style="background:#dcfce7;color:#15803d;'
+                                    f'padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600">'
+                                    f'✓ {t("intake_confirmed")}</span>'
+                                )
+                            else:
+                                badge_html = (
+                                    f'<span style="background:#fee2e2;color:#b91c1c;'
+                                    f'padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600">'
+                                    f'✗ {t("intake_unconfirmed")}</span>'
+                                )
+
+                            note_text = (
+                                str(intake["note"]).strip()
+                                if pd.notna(intake.get("note")) and str(intake.get("note", "")).strip()
+                                else ""
+                            )
+                            note_html = (
+                                f'<div style="font-size:11px;color:#9ca3af;margin-top:1px">'
+                                f'{e(note_text)}</div>'
+                                if note_text else ""
                             )
 
-                            col1, col2 = st.columns([1, 1])
-                            with col1:
-                                if st.button(f"✏️ Bearbeiten", key=f"edit_int_{intake['id']}", use_container_width=True):
+                            card = (
+                                f'<div style="background:white;border:1px solid {theme["border"]};border-radius:12px;padding:0.5rem 1rem;margin-bottom:0.3rem;display:flex;align-items:center;justify-content:space-between;gap:8px">'
+                                f'<div style="display:flex;align-items:center;gap:8px">'
+                                f'<div style="width:8px;height:8px;border-radius:50%;background:{dot_color};flex-shrink:0"></div>'
+                                f'<div><div style="font-size:13px;font-weight:500;color:#111827">{e(str(intake["medication_name"]))}</div>{note_html}</div>'
+                                f'</div>'
+                                f'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
+                                f'<span style="font-size:11px;font-weight:600;background:{theme["metric_bg"]};color:#6b7280;padding:2px 8px;border-radius:7px;font-family:monospace">{e(str(intake["time"]))}</span>'
+                                f'{badge_html}'
+                                f'</div>'
+                                f'</div>'
+                            )
+                            st.markdown(card, unsafe_allow_html=True)
+
+                            col_edit, col_del = st.columns(2)
+                            with col_edit:
+                                if st.button(
+                                    f"✏️ {t('edit_intake')}",
+                                    key=f"ei_{intake['id']}",
+                                    use_container_width=True
+                                ):
                                     st.session_state["editing_intake_id"] = int(intake["id"])
                                     st.rerun()
-                            with col2:
-                                if st.button(f"🗑️ Löschen", key=f"del_int_{intake['id']}", use_container_width=True):
+                            with col_del:
+                                if st.button(
+                                    f"🗑️ {t('delete_intake')}",
+                                    key=f"di_{intake['id']}",
+                                    use_container_width=True
+                                ):
                                     st.session_state["intakes_df"] = intakes_df[
                                         intakes_df["id"] != intake["id"]
                                     ].reset_index(drop=True)
                                     save_intakes()
-                                    st.success("Einnahme gelöscht.")
+                                    st.success(t("intake_deleted"))
                                     st.rerun()
 
                 st.divider()
 
-# ── Tab 2: Statistik ───────────────────────────────────────────────────────────
+# ── Tab 2: Statistik ──────────────────────────────────────────────────────────
 with tab_stats:
     if intakes_df.empty or meds_df.empty:
-        st.info("Noch keine Daten für Statistiken vorhanden.")
+        st.info(t("no_data"))
     else:
-        df_s = intakes_df.copy()
-        df_s["confirmed_bool"] = df_s["confirmed"].apply(is_confirmed)
+        df_stats = intakes_df.copy()
+        df_stats["confirmed_bool"] = df_stats["confirmed"].apply(is_confirmed)
 
-        total_intakes     = len(intakes_df)
-        total_confirmed   = int(df_s["confirmed_bool"].sum())
-        total_unconfirmed = total_intakes - total_confirmed
-        c1, c2, c3 = st.columns(3)
-        c1.metric("📋 Einnahmen gesamt", total_intakes)
-        c2.metric("✅ Bestätigt", total_confirmed)
-        c3.metric("❌ Nicht bestätigt", total_unconfirmed)
+        total_count     = len(intakes_df)
+        confirmed_count = int(df_stats["confirmed_bool"].sum())
+        unconfirmed     = total_count - confirmed_count
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric(f"📋 {t('stats_total')}",         total_count)
+        col2.metric(f"✅ {t('stats_confirmed')}",      confirmed_count)
+        col3.metric(f"❌ {t('stats_not_confirmed')}",  unconfirmed)
 
         st.divider()
-        st.markdown("#### Einnahmetreue pro Medikament")
-        st.caption("Jeder Punkt = eine Einnahme. Grün = bestätigt, grau = nicht bestätigt.")
+        st.markdown(f"#### {t('adherence_per_med')}")
+        st.caption(t("adherence_dot_hint"))
         st.write("")
 
         for _, med in meds_df.iterrows():
-            med_intakes = df_s[df_s["medication_id"] == med["id"]].sort_values("date")
+            med_intakes = df_stats[
+                df_stats["medication_id"] == med["id"]
+            ].sort_values("date")
+
             if med_intakes.empty:
                 continue
-            total     = len(med_intakes)
-            confirmed = int(med_intakes["confirmed_bool"].sum())
-            pct       = int(confirmed / total * 100)
 
-            if pct >= 80:   pct_col = "#16a34a"
-            elif pct >= 50: pct_col = "#d97706"
-            else:           pct_col = "#dc2626"
+            total    = len(med_intakes)
+            conf     = int(med_intakes["confirmed_bool"].sum())
+            pct      = int(conf / total * 100)
+            last_d   = med_intakes["date"].iloc[-1]
 
-            dots_html = "".join(
-                f'<div style="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:{"#22c55e" if r["confirmed_bool"] else "#e5e7eb"}" title="{e(str(r["date"]))}"></div>'
-                for _, r in med_intakes.tail(30).iterrows()
-            )
-            last_date = med_intakes["date"].iloc[-1]
+            if pct >= 80:
+                pct_color = "#15803d"
+            elif pct >= 50:
+                pct_color = "#b45309"
+            else:
+                pct_color = "#b91c1c"
 
-            st.markdown(
-                f'<div style="background:white;border:1px solid #e5e7eb;border-radius:14px;'
-                f'padding:1rem 1.25rem;margin-bottom:0.6rem;display:flex;align-items:center;'
-                f'justify-content:space-between;gap:1rem">'
-                f'  <div style="flex:1">'
-                f'    <div style="font-weight:600;font-size:0.95rem;color:#111827;margin-bottom:0.2rem">💊 {e(str(med["name"]))}</div>'
-                f'    <div style="font-size:0.8rem;color:#6b7280;margin-bottom:0.4rem">{confirmed} von {total} bestätigt &nbsp;·&nbsp; Letzte: {e(str(last_date))}</div>'
-                f'    <div style="display:flex;gap:4px;flex-wrap:wrap">{dots_html}</div>'
-                f'  </div>'
-                f'  <div style="font-size:1.5rem;font-weight:700;color:{pct_col};min-width:52px;text-align:right">{pct}%</div>'
-                f'</div>',
-                unsafe_allow_html=True
-            )
+            dots_html = "".join([
+                f'<div style="width:9px;height:9px;border-radius:50%;flex-shrink:0;'
+                f'background:{"#22c55e" if row["confirmed_bool"] else "#e5e7eb"}"></div>'
+                for _, row in med_intakes.tail(30).iterrows()
+            ])
 
-# ── Tab 3: Formular ────────────────────────────────────────────────────────────
+            st.markdown(f"""
+            <div style="background:white;border:1px solid {theme['border']};border-radius:14px;
+                        padding:1rem 1.25rem;margin-bottom:0.6rem;
+                        display:flex;align-items:center;justify-content:space-between;gap:1rem">
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:0.95rem;color:#111827;margin-bottom:0.2rem">
+                        💊 {e(str(med['name']))}
+                    </div>
+                    <div style="font-size:0.8rem;color:#6b7280;margin-bottom:0.4rem">
+                        {conf} {t('adherence_of')} {total} {t('adherence_confirmed')}
+                        · {t('adherence_last')}: {e(str(last_d))}
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap">{dots_html}</div>
+                </div>
+                <div style="font-size:1.5rem;font-weight:700;color:{pct_color};
+                            min-width:52px;text-align:right">{pct}%</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+# ── Tab 3: Einnahme erfassen / bearbeiten ─────────────────────────────────────
 with tab_form:
     if meds_df.empty:
-        st.info("Bitte zuerst ein Medikament anlegen.")
+        st.info(t("med_none"))
     else:
-        editing_id  = st.session_state.get("editing_intake_id")
-        editing_row = None
-        if editing_id is not None and not intakes_df.empty:
-            matches = intakes_df[intakes_df["id"] == editing_id]
+        editing_intake_id  = st.session_state.get("editing_intake_id")
+        editing_intake_row = None
+        if editing_intake_id is not None and not intakes_df.empty:
+            matches = intakes_df[intakes_df["id"] == editing_intake_id]
             if not matches.empty:
-                editing_row = matches.iloc[0]
+                editing_intake_row = matches.iloc[0]
 
-        if editing_row is not None:
-            st.markdown(f"**Bearbeite Einnahme** vom {editing_row['date']}")
-            if st.button("↩️ Abbrechen"):
+        if editing_intake_row is not None:
+            st.markdown(f"**{t('editing_intake_of')}** {editing_intake_row['date']}")
+            if st.button(f"↩️ {t('cancel_edit')}"):
                 st.session_state["editing_intake_id"] = None
                 st.rerun()
 
-        med_options   = {f"{r['name']} ({r['time']})": int(r["id"]) for _, r in meds_df.iterrows()}
-        option_labels = list(med_options.keys())
+        # Medikament-Auswahl
+        med_options    = {
+            f"{row['name']} ({row['time']})": int(row["id"])
+            for _, row in meds_df.iterrows()
+        }
+        option_labels  = list(med_options.keys())
 
-        if editing_row is not None:
-            sel_label    = next((l for l, mid in med_options.items() if mid == editing_row["medication_id"]), option_labels[0])
-            default_idx  = option_labels.index(sel_label)
-            default_date = datetime.strptime(str(editing_row["date"]), "%Y-%m-%d").date()
-            default_time = datetime.strptime(str(editing_row["time"]), "%H:%M").time()
-            default_conf = is_confirmed(editing_row.get("confirmed", True))
-            default_note = str(editing_row["note"]) if pd.notna(editing_row.get("note")) else ""
+        if editing_intake_row is not None:
+            selected_label = next(
+                (lbl for lbl, mid in med_options.items()
+                 if mid == editing_intake_row["medication_id"]),
+                option_labels[0]
+            )
+            default_index = option_labels.index(selected_label)
+            default_date  = datetime.strptime(str(editing_intake_row["date"]), "%Y-%m-%d").date()
+            default_time  = datetime.strptime(str(editing_intake_row["time"]), "%H:%M").time()
+            default_conf  = is_confirmed(editing_intake_row.get("confirmed", True))
+            default_note  = str(editing_intake_row["note"]) if pd.notna(editing_intake_row.get("note")) else ""
         else:
-            default_idx, default_date, default_time = 0, date.today(), dtime(8, 0)
-            default_conf, default_note = True, ""
+            default_index = 0
+            default_date  = date.today()
+            default_time  = dtime(8, 0)
+            default_conf  = True
+            default_note  = ""
 
         with st.form("intake_form", clear_on_submit=True):
-            sel_med     = st.selectbox("Medikament", options=option_labels, index=default_idx)
-            intake_date = st.date_input("Datum", value=default_date)
-            intake_time = st.time_input("Uhrzeit", value=default_time, step=300)
-            confirmed   = st.checkbox("Einnahme bestätigt", value=default_conf)
-            note        = st.text_area("Bemerkung (optional)", value=default_note)
+            selected_med = st.selectbox(t("med_title"), options=option_labels, index=default_index)
+            intake_date  = st.date_input(t("intake_date"), value=default_date)
+            intake_time  = st.time_input(t("intake_time"), value=default_time, step=300)
+            confirmed_cb = st.checkbox(t("intake_confirmed_cb"), value=default_conf)
+            note_in      = st.text_area(t("intake_note"), value=default_note)
+            submitted    = st.form_submit_button(t("save"), use_container_width=True)
 
-            submitted = st.form_submit_button("💾 Speichern", use_container_width=True)
             if submitted:
-                med_id   = med_options[sel_med]
+                med_id   = med_options[selected_med]
                 med_name = meds_df[meds_df["id"] == med_id].iloc[0]["name"]
                 time_str = intake_time.strftime("%H:%M")
 
-                if editing_row is not None:
+                if editing_intake_row is not None:
                     idx = st.session_state["intakes_df"].index[
-                        st.session_state["intakes_df"]["id"] == editing_id
+                        st.session_state["intakes_df"]["id"] == editing_intake_id
                     ].tolist()
                     if idx:
-                        st.session_state["intakes_df"].at[idx[0], "medication_id"]    = med_id
-                        st.session_state["intakes_df"].at[idx[0], "medication_name"]  = med_name
-                        st.session_state["intakes_df"].at[idx[0], "date"]             = intake_date.isoformat()
-                        st.session_state["intakes_df"].at[idx[0], "time"]             = time_str
-                        st.session_state["intakes_df"].at[idx[0], "confirmed"]        = confirmed
-                        st.session_state["intakes_df"].at[idx[0], "note"]             = note.strip()
+                        st.session_state["intakes_df"].at[idx[0], "medication_id"]   = med_id
+                        st.session_state["intakes_df"].at[idx[0], "medication_name"] = med_name
+                        st.session_state["intakes_df"].at[idx[0], "date"]            = intake_date.isoformat()
+                        st.session_state["intakes_df"].at[idx[0], "time"]            = time_str
+                        st.session_state["intakes_df"].at[idx[0], "confirmed"]       = confirmed_cb
+                        st.session_state["intakes_df"].at[idx[0], "note"]            = note_in.strip()
                     st.session_state["editing_intake_id"] = None
-                    st.success("✅ Einnahme aktualisiert.")
+                    st.success(t("intake_updated"))
                 else:
                     new_row = pd.DataFrame([{
                         "id":              next_id(st.session_state["intakes_df"]),
@@ -320,14 +409,15 @@ with tab_form:
                         "medication_name": med_name,
                         "date":            intake_date.isoformat(),
                         "time":            time_str,
-                        "confirmed":       confirmed,
-                        "note":            note.strip(),
+                        "confirmed":       confirmed_cb,
+                        "note":            note_in.strip(),
                         "created_at":      pd.Timestamp.now(),
                     }])
                     st.session_state["intakes_df"] = pd.concat(
-                        [st.session_state["intakes_df"], new_row], ignore_index=True
+                        [st.session_state["intakes_df"], new_row],
+                        ignore_index=True
                     )
-                    st.success("✅ Einnahme gespeichert.")
+                    st.success(t("intake_saved"))
 
                 save_intakes()
                 st.rerun()

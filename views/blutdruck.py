@@ -196,8 +196,14 @@ else:
         </tr></thead><tbody>{rows_html}</tbody></table></div>""", unsafe_allow_html=True)
 
     with st.expander(f"ℹ️ {t('bp_ref_title')}"):
+        bp_source = {
+            "de": "Quelle: Deutsche Gesellschaft für Kardiologie (DGK) / Herzstiftung",
+            "fr": "Source: Société Allemande de Cardiologie (DGK) / Fondation du cœur",
+            "it": "Fonte: Società Tedesca di Cardiologia (DGK) / Fondazione del cuore",
+            "en": "Source: German Cardiac Society (DGK) / Heart Foundation",
+        }.get(st.session_state.get("language", "de"), "")
         st.markdown(f"""
-| {t('ref_category') if 'ref_category' in dir() else 'Kategorie'} | {t('bp_systolic_short')} (mmHg) | {t('bp_diastolic_short')} (mmHg) |
+| {t('ref_category')} | {t('bp_systolic_short')} (mmHg) | {t('bp_diastolic_short')} (mmHg) |
 |---|---|---|
 | 🟣 {t('bp_hypo')} | < 100 | < 60 |
 | 🟢 {t('bp_optimal')} | < 120 | < 80 |
@@ -207,7 +213,7 @@ else:
 | 🔴 {t('bp_hyp2')} | 160–179 | 100–109 |
 | 🔴 {t('bp_hyp3')} | ≥ 180 | ≥ 110 |
 
-*ESC/ESH / Deutsche Gesellschaft für Kardiologie (DGK)*
+*{bp_source}*
         """)
 
     with st.expander(f"🗑️ {t('bp_delete')}"):
