@@ -2,7 +2,7 @@
 
 **Modul:** Informatik 2  
 **Applikationsname:** MediTrack – Medikamenten- und Gesundheitstracker  
-**Technologie:** Python · Streamlit · SwitchDrive (WebDAV) · fpdf2 · Plotly · SVG 
+**Technologie:** Python · Streamlit · SwitchDrive (WebDAV) · fpdf2 · Plotly · SVG
 **Zeitraum:** April 2026 - Mai 2026
 
 ---
