@@ -1,34 +1,124 @@
-# Die MediTrack App
-## Die App für eine einfache Medikamentenplanung
+# 💊 MediTrack
+### Die App für smarte Medikamenten- und Gesundheitsverwaltung
 
-Die MediTrack App unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente übersichtlich zu verwalten um zuverlässig an die Einnahme zu denken. Ziel ist es, die Medikamentensicherheit zu erhöhen und den Alltag zu erleichtern.
+MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverlässig zu verwalten, Gesundheitswerte zu tracken und den Überblick über ihre persönliche Gesundheit zu behalten. Die App erhöht die Medikamentensicherheit und erleichtert den Alltag – für mehr Lebensqualität.
 
-## Funktionen
+---
 
-* Medikamente hinzufügen und verwalten
-* Einnahmezeiten planen
-* Übersicht über aktuelle Medikation
+## 🚀 Funktionen
 
-## Zielgruppe
+### 💊 Medikamentenverwaltung
+- Medikamente hinzufügen, bearbeiten und löschen
+- Einnahmezeiten und Wochentage individuell planen
+- Automatische Erinnerungen für ausstehende Einnahmen
 
-Die App richtet sich an:
-* Personen mit regelmässiger Medikamenteneinnahme
-* Patientinnen und Patienten mit chronischen Erkrankungen
+### 📋 Einnahmeverlauf
+- Chronologische Übersicht nach Monat, Woche und Tag
+- Einnahmetreue pro Medikament in Prozent
+- Statistiken und Auswertungen auf einen Blick
 
-## Technologien
+### ❤️ Gesundheitswerte
+- **Blutdruck-Tagebuch** mit Klassifizierung nach DGK-Leitlinien und Risikozonen-Chart
+- **Blutzucker-Tagebuch** (Nüchternwerte) mit medizinischer Bewertung
+- Trend-Analyse (steigend / sinkend / stabil) für alle Werte
 
-* Python
-* Streamlit
-* GitHub
+### 😊 Tagesstimmung
+- Stimmungserfassung mit Emoji-Skala und optionalem Kommentar
+- Verlaufschart der letzten 30 Tage
 
-## Projektziel
+### 🔥 Streak-System
+- Motivierende Anzeige wie viele Tage in Folge alle Medikamente eingenommen wurden
 
-Ziel des Projekts ist es, eine benutzerfreundliche Anwendung zu entwickeln, die die Medikamenteneinnahme vereinfacht und Fehler reduziert.
+### 📄 PDF-Export
+- Export von Einnahmen, Blutdruck, Blutzucker und Stimmung als PDF
+- Ideal für den nächsten Arztbesuch
 
-### **Diese App wurde von folgenden Personen entwickelt:**
-- Giada De Luca (delucgia@students.zhaw.ch)
-- Priscilla Baccaro (baccapri@students.zhaw.ch)
-- Ana Lucia Gomes Carvalho (gomesana@students.zhaw.ch)
+### 👤 Persönliches Profil
+- Persönliche Angaben, Blutgruppe, Allergien und Notfallkontakt speichern
 
+### ⚙️ Personalisierung
+- **4 Sprachen:** 🇩🇪 Deutsch · 🇫🇷 Français · 🇮🇹 Italiano · 🇬🇧 English
+- **9 Farbthemen:** Ozean-Blau, Lila, Smaragd, Rosa, Sonnenschein, Türkis, Himmelblau, Minze, Lavendel
 
+---
 
+## 🎯 Zielgruppe
+
+- Personen mit regelmässiger Medikamenteneinnahme
+- Patientinnen und Patienten mit chronischen Erkrankungen
+- Ältere Menschen, die Unterstützung bei der Medikamentenplanung benötigen
+- Angehörige, die die Medikation einer nahestehenden Person mitverwalten
+
+---
+
+## 🛠️ Technologien
+
+| Technologie | Verwendung |
+|---|---|
+| Python | Programmiersprache |
+| Streamlit | Web-Framework und UI |
+| Pandas | Datenverarbeitung |
+| Plotly | Interaktive Charts |
+| fpdf2 | PDF-Generierung |
+| SwitchDrive (WebDAV) | Cloud-Datenspeicherung |
+| GitHub | Versionskontrolle |
+
+---
+
+## 📁 Projektstruktur
+
+```
+Medikamentenplaner.app-1/
+├── app.py                  # Einstiegspunkt, Login, Navigation
+├── requirements.txt        # Abhängigkeiten
+├── views/                  # App-Seiten
+│   ├── dashboard.py
+│   ├── medikamente.py
+│   ├── verlauf.py
+│   ├── blutdruck.py
+│   ├── blutzucker.py
+│   ├── stimmung.py
+│   ├── profil.py
+│   ├── einstellungen.py
+│   └── pdf_export.py
+├── utils/                  # Hilfsmodule
+│   ├── data_manager.py
+│   ├── login_manager.py
+│   ├── themes.py
+│   ├── translations.py
+│   └── pdf_export.py
+└── docs/
+    └── prozessdokumentation.md
+```
+
+---
+
+## ▶️ Installation und Start
+
+```bash
+# Repository klonen
+git clone https://github.com/your-repo/meditrack.git
+cd meditrack
+
+# Abhängigkeiten installieren
+pip install -r requirements.txt
+
+# App starten
+streamlit run app.py
+```
+
+---
+
+## 👩‍💻 Entwicklerinnen
+
+Dieses Projekt wurde im Rahmen des Moduls **Informatik 2** an der **ZHAW** entwickelt.
+
+| Name | E-Mail |
+|---|---|
+| Giada De Luca | delucgia@students.zhaw.ch |
+| Priscilla Baccaro | baccapri@students.zhaw.ch |
+| Ana Lucia Gomes Carvalho | gomesana@students.zhaw.ch |
+
+---
+
+*ZHAW – Zürcher Hochschule für Angewandte Wissenschaften · Informatik 2 · Mai 2026*
