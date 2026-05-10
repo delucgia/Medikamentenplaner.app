@@ -34,26 +34,39 @@ Im Rahmen des Moduls Informatik 2 sollte eine praxisnahe Web-Applikation entwick
 ```
 Medikamentenplaner.app-1/
 │
-├── app.py                          # Einstiegspunkt, Login, Navigation, Theme-Injection
-├── requirements.txt                # Abhängigkeiten (streamlit, pandas, plotly, fpdf2)
+├── docs/                               # Dokumentation
+│   ├── MVP-Reflexion.md
+│   ├── Persona.md
+│   ├── Produkt-Roadmap.md
+│   ├── Prozessdokumentation.md
+│   ├── Wireframe-Nutzertests.md
+│   └── Wireframes/                     # Wireframe-Skizzen und Storyboard
 │
-├── views/                          # Alle Seiten der App
-│   ├── dashboard.py                # Tagesübersicht mit Streak, Metriken, Gesundheitswerte
-│   ├── medikamente.py              # Medikamentenverwaltung (CRUD)
-│   ├── verlauf.py                  # Einnahmeverlauf mit Statistik und Monatsgruppierung
-│   ├── blutdruck.py                # Blutdruck-Tagebuch mit Plotly-Chart und Risikozonen
-│   ├── blutzucker.py               # Blutzucker-Tagebuch mit Plotly-Chart
-│   ├── stimmung.py                 # Tagesstimmung mit Emoji-Skala und Verlaufschart
-│   ├── profil.py                   # Persönliches Profil und Notfallkontakt
-│   ├── einstellungen.py            # Sprache und Farbthema wählen
-│   └── pdf_export.py               # PDF-Export mit Auswahl der Datenbereiche
+├── utils/                              # Hilfsmodule
+│   ├── __init__.py
+│   ├── data_handler.py                 # Daten-Handler
+│   ├── data_manager.py                 # SwitchDrive WebDAV – Daten laden und speichern
+│   ├── login_manager.py                # Login und Registrierung
+│   └── pdf_export.py                   # PDF-Generierung mit fpdf2
 │
-└── utils/                          # Hilfsmodule
-    ├── data_manager.py             # SwitchDrive WebDAV – Daten laden und speichern
-    ├── login_manager.py            # Login und Registrierung
-    ├── themes.py                   # 9 Farbthemen mit CSS-Injection
-    ├── translations.py             # Übersetzungen DE/FR/IT/EN (130+ Keys pro Sprache)
-    └── pdf_export.py               # PDF-Generierung mit fpdf2
+├── views/                              # Alle Seiten der App
+│   ├── blutdruck.py                    # Blutdruck-Tagebuch mit Plotly-Chart und Risikozonen
+│   ├── blutzucker.py                   # Blutzucker-Tagebuch mit Plotly-Chart
+│   ├── dashboard.py                    # Tagesübersicht mit Streak, Metriken, Gesundheitswerte
+│   ├── einstellungen.py                # Sprache und Farbthema wählen
+│   ├── home.py                         # Startseite / Landingpage
+│   ├── medikamente.py                  # Medikamentenverwaltung (CRUD)
+│   ├── pdf_export.py                   # PDF-Export-Seite mit Auswahl der Datenbereiche
+│   ├── profil.py                       # Persönliches Profil und Notfallkontakt
+│   ├── stimmung.py                     # Tagesstimmung mit Emoji-Skala und Verlaufschart
+│   └── verlauf.py                      # Einnahmeverlauf mit Statistik und Monatsgruppierung
+│
+├── .gitignore
+├── README.md
+├── app.py                              # Einstiegspunkt, Login, Navigation, Theme-Injection
+├── requirements.txt                    # Abhängigkeiten (streamlit, pandas, plotly, fpdf2)
+├── themes.py                           # 9 Farbthemen mit CSS-Injection
+└── translations.py                     # Übersetzungen DE/FR/IT/EN (130+ Keys pro Sprache)
 ```
 
 ---
@@ -73,7 +86,7 @@ Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morg
 ### 4.2 Medikamente
 - Medikamente hinzufügen mit Name, Uhrzeit, Wochentagen (Multiselect) und Bemerkung
 - Bearbeiten und Löschen direkt in der Übersicht
-- Wochentage werden intern immer als Kürzel gespeichert (Mo, Di, ...) und in der jeweiligen Sprache angezeigt
+- Wochentage werden intern immer als DE-Kürzel gespeichert (Mo, Di, ...) und in der jeweiligen Sprache angezeigt
 
 ### 4.3 Einnahmeverlauf
 - Chronologisch gruppiert: Monat → Kalenderwoche → Tag
@@ -204,7 +217,7 @@ Die Trend-Analyse für Blutdruck und Blutzucker vergleicht den Durchschnitt der 
 
 | Entscheidung | Begründung |
 |---|---|
-| Wochentage intern immer als Kürzel | Einfache Handhabung unabhängig von Spracheinstellung |
+| Wochentage intern immer als DE-Kürzel | Einfache Handhabung unabhängig von Spracheinstellung |
 | Geburtsdatum als 3 Zahlenfelder | Streamlit `date_input` ist auf Jahr 2000 begrenzt |
 | Medizinische Texte nur auf Deutsch | Sicherheit – fehlerhafte Übersetzungen medizinischer Anweisungen wären gefährlich |
 | `mood_df` immer frisch laden | Verhindert veraltete Daten nach App-Neustart |
