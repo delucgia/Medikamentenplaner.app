@@ -65,50 +65,6 @@ MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverläss
 
 ---
 
-## 📁 Projektstruktur
-
-```
-Medikamentenplaner.app-1/
-├── app.py                  # Einstiegspunkt, Login, Navigation
-├── requirements.txt        # Abhängigkeiten
-├── views/                  # App-Seiten
-│   ├── dashboard.py
-│   ├── medikamente.py
-│   ├── verlauf.py
-│   ├── blutdruck.py
-│   ├── blutzucker.py
-│   ├── stimmung.py
-│   ├── profil.py
-│   ├── einstellungen.py
-│   └── pdf_export.py
-├── utils/                  # Hilfsmodule
-│   ├── data_manager.py
-│   ├── login_manager.py
-│   ├── themes.py
-│   ├── translations.py
-│   └── pdf_export.py
-└── docs/
-    └── prozessdokumentation.md
-```
-
----
-
-## ▶️ Installation und Start
-
-```bash
-# Repository klonen
-git clone https://github.com/your-repo/meditrack.git
-cd meditrack
-
-# Abhängigkeiten installieren
-pip install -r requirements.txt
-
-# App starten
-streamlit run app.py
-```
-
----
-
 ## 👩‍💻 Entwicklerinnen
 
 Dieses Projekt wurde im Rahmen des Moduls **Informatik 2** an der **ZHAW** entwickelt.
