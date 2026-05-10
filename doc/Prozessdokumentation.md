@@ -2,8 +2,8 @@
 
 **Modul:** Informatik 2  
 **Applikationsname:** MediTrack – Medikamenten- und Gesundheitstracker  
-**Technologie:** Python · Streamlit · SwitchDrive (WebDAV) · fpdf2 · Plotly  
-**Zeitraum:** Mai 2026
+**Technologie:** Python · Streamlit · SwitchDrive (WebDAV) · fpdf2 · Plotly · SVG 
+**Zeitraum:** April 2026 - Mai 2026
 
 ---
 
@@ -11,7 +11,7 @@
 
 MediTrack ist eine webbasierte Gesundheits-App, die mit dem Python-Framework **Streamlit** entwickelt wurde. Sie ermöglicht es Nutzerinnen und Nutzern, ihre tägliche Medikamenteneinnahme zu verwalten, Gesundheitswerte wie Blutdruck und Blutzucker zu tracken, ihre Stimmung zu erfassen und alle Daten als PDF zu exportieren.
 
-Die App ist mehrsprachig (Deutsch, Französisch, Italienisch, Englisch), vollständig personalisierbar (9 Farbthemen) und speichert alle Daten sicher in der Cloud via **SwitchDrive** (WebDAV).
+Die App ist mehrsprachig (Deutsch, Französisch, Italienisch, Englisch), vollständig personalisierbar (9 Farbthemen, 3 Maskottchen) und speichert alle Daten sicher in der Cloud via **SwitchDrive** (WebDAV). Ein integriertes Maskottchen und Abzeichen-System machen die App motivierend und einzigartig.
 
 ---
 
@@ -26,6 +26,7 @@ Im Rahmen des Moduls Informatik 2 sollte eine praxisnahe Web-Applikation entwick
 - Mehrsprachigkeit für den Schweizer Kontext (DE/FR/IT/EN)
 - Ansprechendes, professionelles UI-Design
 - PDF-Export für den Arztbesuch
+- Motivierende Elemente (Maskottchen, Streak, Abzeichen) für eine nachhaltige Nutzung
 
 ---
 
@@ -34,80 +35,100 @@ Im Rahmen des Moduls Informatik 2 sollte eine praxisnahe Web-Applikation entwick
 ### 3.1 Dashboard
 Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morgen/Mittag/Abend) und zeigt:
 
-- **Streak-Banner** – Wie viele Tage in Folge wurden alle Medikamente eingenommen? (motivierendes Feature mit Flammen-Emoji)
+- **Maskottchen mit Sprechblase** – Das gewählte Maskottchen erscheint oben rechts mit einer kontextabhängigen Nachricht
+- **Streak-Banner** – Wie viele Tage in Folge wurden alle Medikamente eingenommen?
 - **3 Metriken** – Anzahl Medikamente, heute eingenommen (X/Y), Einnahmen diese Woche
-- **Erinnerungs-Banner** – Für jedes noch ausstehende Medikament erscheint ein gelber Hinweis mit Uhrzeit
-- **Heutige Medikamente** – Übersicht mit Bestätigen-Button, farbigem Status-Badge und direktem Link zu Bearbeiten
-- **Einnahmetreue** – Pro Medikament ein Fortschrittsbalken (grün/orange/rot je nach Prozentsatz)
-- **Letzte Gesundheitswerte** – Letzter Blutdruck und Blutzucker mit Statusanzeige und Trend-Indikator (↑↓→)
+- **Erinnerungs-Banner** – Für jedes noch ausstehende Medikament erscheint ein gelber Hinweis
+- **Heutige Medikamente** – Übersicht mit Bestätigen-Button und farbigem Status-Badge
+- **Einnahmetreue** – Pro Medikament ein Fortschrittsbalken (grün/orange/rot)
+- **Letzte Gesundheitswerte** – Letzter Blutdruck und Blutzucker mit Trend-Indikator (↑↓→)
 
 ### 3.2 Medikamente
 - Medikamente hinzufügen mit Name, Uhrzeit, Wochentagen (Multiselect) und Bemerkung
 - Bearbeiten und Löschen direkt in der Übersicht
-- Wochentage werden intern immer als DE-Kürzel gespeichert (Mo, Di, ...) und in der jeweiligen Sprache angezeigt
+- Wochentage werden intern immer als DE-Kürzel gespeichert und in der jeweiligen Sprache angezeigt
 
 ### 3.3 Einnahmeverlauf
 - Chronologisch gruppiert: Monat → Kalenderwoche → Tag
 - Farbige Punkte: Grün = bestätigt, Rot = nicht bestätigt
 - Filter nach Zeitraum und Medikament
-- Statistik-Tab mit Gesamt-Metriken und Einnahmetreue-Punktedarstellung pro Medikament
+- Statistik-Tab mit Gesamt-Metriken und Adherence-Punktedarstellung
 - Tab zum manuellen Erfassen und Bearbeiten von Einnahmen
 - PDF-Export-Button direkt im Verlauf
 
 ### 3.4 Blutdruck-Tagebuch
-- Eingabe von systolischem und diastolischem Wert
-- Klassifizierung nach **DGK-Leitlinien** (Deutsche Gesellschaft für Kardiologie):
-  - Hypotonie / Optimal / Normal / Hoch-normal / Hypertonie Grad 1–3
-- **Sonderfälle** werden erkannt:
-  - Isolierte systolische Hypertonie (hoher Oberwert, tiefer Unterwert)
-  - Isolierte diastolische Hypertonie (tiefer Oberwert, hoher Unterwert)
-- Plotly-Chart mit 7 farbigen Risikozonen (ohne Zahlenbeschriftung, nur Fachbegriff)
-- Farbige Messpunkte je nach Kategorie
+- Klassifizierung nach **DGK-Leitlinien**: Hypotonie / Optimal / Normal / Hoch-normal / Hypertonie Grad 1–3
+- **Sonderfälle** werden erkannt: Isolierte systolische und diastolische Hypertonie
+- Plotly-Chart mit 7 farbigen Risikozonen
 - Handlungsempfehlungen in ganzen Sätzen (auf Deutsch, mit Disclaimer in anderen Sprachen)
-- Referenzwerte-Tabelle und Sonderfälle-Tabelle als Expander
 
 ### 3.5 Blutzucker-Tagebuch
-- Nüchternblutzucker in mmol/l (morgens vor dem Essen)
-- Klassifizierung: Normal / Auffällig tief / Auffällig hoch / Kritisch tief / Kritisch hoch
+- Nüchternblutzucker in mmol/l
+- Klassifizierung: Normal / Auffällig tief & hoch / Kritisch tief & hoch
 - Plotly-Chart mit 6 Risikozonen und farbigen Messpunkten
-- Handlungsempfehlungen analog zum Blutdruck
 
 ### 3.6 Tagesstimmung
-- 5 Stufen mit Emoji-Skala: 😄 Sehr gut / 🙂 Gut / 😐 Okay / 😕 Schlecht / 😞 Sehr schlecht
+- 5 Stufen mit Emoji-Skala: 😄 😙 😐 😕 😞
 - Optionaler Freitext-Kommentar
-- Heutiger Eintrag wird oben als Banner angezeigt
-- Plotly-Verlaufschart mit übersetzten Y-Achsen-Labels
-- Letzte 7 Einträge als Karten
-- Löschfunktion via Expander
+- Plotly-Verlaufschart mit übersetzten Achsenbeschriftungen
+- Letzte 7 Einträge als Karten, Löschfunktion
 
-### 3.7 Profil
+### 3.7 Abzeichen-System (Achievements)
+11 freischaltbare Abzeichen motivieren zu einer konsequenten Nutzung der App:
+
+| Abzeichen | Bedingung |
+|---|---|
+| 🌱 Erster Schritt | Erste Einnahme bestätigt |
+| 🔥 On Fire | 7 Tage Streak |
+| 💪 Eiserner Wille | 30 Tage Streak |
+| 👑 Legende | 100 Tage Streak |
+| 💚 Grüne Zone | Blutdruck 7× optimal |
+| 🩸 Zuckerfrei | Blutzucker 5× normal |
+| 📊 Daten-Fan | 20 Gesundheitswerte erfasst |
+| 🧘 Ausgeglichen | 7× Stimmung "Sehr gut" |
+| 📄 Arztprofi | Ersten PDF exportiert |
+| 🏅 Treuer Begleiter | 50 Einnahmen bestätigt |
+| ✨ Vollständig | Profil vollständig ausgefüllt |
+
+Die Abzeichen-Seite zeigt freigeschaltete Badges grün umrandet und gesperrte ausgegraut. Das Maskottchen reagiert auf den Fortschritt.
+
+### 3.8 Maskottchen
+Das Maskottchen begleitet die Nutzerin oder den Nutzer durch die gesamte App. Es erscheint auf dem Dashboard und der Abzeichen-Seite mit einer kontextabhängigen Sprechblase.
+
+**3 wählbare Charaktere:**
+- **Vita** 🩷 – Herz-Figur, fürsorglich und warm
+- **Medi** 💊 – Pille-Figur, verspielt und lustig
+- **Dr. Care** 🩺 – Doktor-Figur, professionell und kompetent
+
+**4 Stimmungen je nach Kontext:**
+- 😄 **Fröhlich** – Standard, Morgen/Mittag/Abend-Begrüssung
+- 🔥 **Aufgeregt** – Bei Streak ≥ 7 Tage oder neuem Achievement
+- 😟 **Besorgt** – Bei schlechten Gesundheitswerten oder ausstehenden Medikamenten
+- 😴 **Müde** – Nach 20 Uhr
+
+Die Maskottchenwahl wird in den Einstellungen gespeichert und bleibt über alle Sitzungen erhalten.
+
+### 3.9 Profil
 - 3 Tabs: Persönlich / Medizinisch / Notfall
-- Geburtsdatum als 3 separate Zahlenfelder (Jahr 1900 bis heute, kein Streamlit-Limit)
-- Initialen-Avatar mit Theme-Gradient
+- Geburtsdatum als 3 separate Zahlenfelder (Jahr 1900 bis heute)
 - Gespeicherte Angaben als strukturierte Übersicht
 
-### 3.8 Einstellungen
-- **4 Sprachen:** 🇩🇪 Deutsch / 🇫🇷 Français / 🇮🇹 Italiano / 🇬🇧 English
-- **9 Farbthemen:** Ozean-Blau, Lila, Smaragd, Rosa, Sonnenschein, Türkis, Himmelblau, Minze, Lavendel
-- Farbvorschau-Banner mit Gradient
+### 3.10 Einstellungen
+- **4 Sprachen:** DE / FR / IT / EN
+- **9 Farbthemen** mit Vorschau
+- **3 Maskottchen** mit Vorschau
 - Einstellungen werden in `settings.json` pro User auf SwitchDrive gespeichert
 
-### 3.9 PDF-Export
-- Eigene Seite in der Sidebar
-- Checkboxen für jeden Bereich: Einnahmen / Blutdruck / Blutzucker / Stimmung
-- Zeigt Anzahl verfügbarer Einträge
-- Ausgegraut wenn keine Daten vorhanden
-- Generiert sauberes PDF mit fpdf2 (ohne Emojis für Helvetica-Kompatibilität)
-- Download-Button erscheint nach Generierung
-- Dateiname enthält die gewählten Bereiche (z.B. `meditrack_blutdruck_blutzucker.pdf`)
+### 3.11 PDF-Export
+- Eigene Sidebar-Seite mit Checkboxen
+- Zeigt Anzahl verfügbarer Einträge pro Bereich
+- Generiert PDF via fpdf2 (ohne Emojis für Helvetica-Kompatibilität)
 
 ---
 
 ## 4. Technische Umsetzung
 
 ### 4.1 Datenspeicherung
-
-Alle Daten werden pro Benutzer in der **SwitchDrive-Cloud** via WebDAV gespeichert. Die Struktur:
 
 | Datei | Inhalt |
 |---|---|
@@ -117,57 +138,43 @@ Alle Daten werden pro Benutzer in der **SwitchDrive-Cloud** via WebDAV gespeiche
 | `blood_sugar.csv` | date, value |
 | `mood.csv` | date, mood_key, mood_value, mood_label, note |
 | `profile.json` | firstname, lastname, birthdate, doctor, emergency, emergency_phone, blood_type, allergies |
-| `settings.json` | language, theme |
+| `settings.json` | language, theme, mascot |
 
 ### 4.2 Mehrsprachigkeit
 
-Die Übersetzungen sind in `utils/translations.py` strukturiert. Jede Sprache hat ein Dictionary mit über 130 Keys. Die Funktion `t(key)` gibt den übersetzten Text zurück, mit Deutsch als Fallback.
+Die Übersetzungen sind in `utils/translations.py` strukturiert. Jede Sprache hat ein Dictionary mit über 160 Keys. Die Funktion `t(key)` gibt den übersetzten Text zurück, mit Deutsch als Fallback.
 
-```python
-def t(key: str) -> str:
-    lang = st.session_state.get("language", "de")
-    result = TRANSLATIONS.get(lang, TRANSLATIONS["de"]).get(key)
-    if result is None:
-        result = TRANSLATIONS["de"].get(key, key)
-    return result
-```
-
-**Designentscheidung:** Medizinische Handlungsempfehlungen (Notfallhinweise, detaillierte Anweisungen) bleiben auf Deutsch, da eine falsche Übersetzung gesundheitliche Risiken darstellen könnte. In anderen Sprachen erscheint ein Disclaimer-Hinweis.
+**Designentscheidung:** Medizinische Handlungsempfehlungen bleiben auf Deutsch — eine fehlerhafte Übersetzung medizinischer Anweisungen wäre gesundheitlich riskant. In anderen Sprachen erscheint ein Disclaimer-Hinweis.
 
 ### 4.3 Theme-System
 
-Das Theme-System in `utils/themes.py` definiert 9 Farbthemen mit je 12 Attributen (Primärfarbe, Gradient, Sidebar-Hintergrund, etc.). `inject_theme()` wird in `app.py` **vor** `pg.run()` aufgerufen, damit das CSS global für alle Seiten gilt – einschliesslich der Sidebar.
+9 helle Farbthemen in `utils/themes.py`. `inject_theme()` wird in `app.py` **vor** `pg.run()` aufgerufen — der einzige Weg, die Sidebar-Farbe global zu setzen.
+
+### 4.4 Maskottchen-System
+
+Das Maskottchen-System in `utils/vita.py` generiert SVG-Vektorgrafiken direkt in Python. Jeder Charakter hat 4 Stimmungen die als SVG-String zurückgegeben und via `st.markdown(..., unsafe_allow_html=True)` gerendert werden. Kein externes Bild-File nötig.
 
 ```python
-# app.py – Theme wird global injiziert
-from utils.themes import inject_theme
-inject_theme()
-pg.run()
+# Stimmungslogik
+def get_vita_mood(hour, streak, has_pending, bp_status, bs_status):
+    if streak >= 7:      return "excited", "WOW! {streak} Tage Streak!"
+    if bp_bad or bs_bad: return "worried", "Deine Werte machen mir Sorgen..."
+    if has_pending:      return "worried", "Medikamente warten noch!"
+    if hour >= 20:       return "sleepy",  "Gute Nacht!"
+    return "happy", "Hallo! Schön dich zu sehen!"
 ```
 
-### 4.4 Streak-Berechnung
+### 4.5 Abzeichen-System
+
+Die Achievements werden beim Laden der Seite live aus den gespeicherten Daten berechnet — kein separates Speichern nötig. Die Funktion `check_achievements()` prüft Streak, Anzahl bestätigter Einnahmen, Gesundheitswerte und Profilvollständigkeit.
+
+### 4.6 Streak-Berechnung
 
 Der Streak wird rückwärts von heute berechnet. Für jeden Tag wird geprüft, ob alle fälligen Medikamente bestätigt wurden. Tage ohne fällige Medikamente werden übersprungen.
 
-```python
-def compute_streak():
-    check_date = date.today()
-    for _ in range(365):
-        due_meds = ...  # Medikamente die an diesem Tag fällig sind
-        if due_meds.empty:
-            check_date -= timedelta(days=1)
-            continue
-        if all_confirmed(due_meds, check_date):
-            streak += 1
-            check_date -= timedelta(days=1)
-        else:
-            break
-    return streak
-```
+### 4.7 Trend-Analyse
 
-### 4.5 Trend-Analyse
-
-Die Trend-Analyse für Blutdruck und Blutzucker vergleicht den Durchschnitt der ersten und zweiten Hälfte der letzten 7 Messungen. Liegt die Differenz unter 30% der Standardabweichung, gilt der Wert als stabil.
+Vergleicht den Durchschnitt der ersten und zweiten Hälfte der letzten 7 Messungen. Liegt die Differenz unter 30% der Standardabweichung → stabil, sonst steigend oder sinkend.
 
 ---
 
@@ -175,76 +182,83 @@ Die Trend-Analyse für Blutdruck und Blutzucker vergleicht den Durchschnitt der 
 
 | Entscheidung | Begründung |
 |---|---|
-| Wochentage intern immer als DE-Kürzel | Einfache Handhabung unabhängig von Spracheinstellung |
+| Maskottchen als SVG | Kein externes Bild nötig, skaliert perfekt, voll kontrollierbar |
+| 3 Maskottchen zur Auswahl | Persönlichere Nutzererfahrung, höhere Identifikation |
+| Achievements live berechnet | Kein separates Speichern, immer aktuell |
+| Wochentage intern als DE-Kürzel | Einfache Handhabung unabhängig von Spracheinstellung |
 | Geburtsdatum als 3 Zahlenfelder | Streamlit `date_input` ist auf Jahr 2000 begrenzt |
-| Medizinische Texte nur auf Deutsch | Sicherheit – fehlerhafte Übersetzungen medizinischer Anweisungen wären gefährlich |
+| Medizinische Texte nur auf Deutsch | Sicherheit – fehlerhafte medizinische Übersetzungen wären gefährlich |
 | `mood_df` immer frisch laden | Verhindert veraltete Daten nach App-Neustart |
-| `inject_theme()` in `app.py` vor `pg.run()` | Einzige Möglichkeit, Sidebar-Farbe global zu setzen |
+| `inject_theme()` vor `pg.run()` | Einzige Möglichkeit, Sidebar-Farbe global zu setzen |
 | fpdf2 ohne Emojis | Helvetica unterstützt keine Unicode-Emojis |
-| Sonderfälle Blutdruck separat erkennen | Medizinisch korrekte Unterscheidung von isolierter systolischer/diastolischer Hypertonie |
 
 ---
 
 ## 6. Herausforderungen und Lösungen
 
 ### Herausforderung 1: Sidebar-Farbe übernimmt Theme nicht
-**Problem:** Das CSS-Theme wurde nur auf der aktuellen Seite angewendet, die Sidebar blieb immer grau.  
-**Lösung:** `inject_theme()` wird einmalig in `app.py` vor `pg.run()` aufgerufen. Da Streamlit das CSS-Rendering zentralisiert, gilt die Injection dann für alle Seiten.
+**Problem:** Das CSS-Theme galt nur auf der aktuellen Seite.  
+**Lösung:** `inject_theme()` einmalig in `app.py` vor `pg.run()` aufrufen.
 
-### Herausforderung 2: HTML-Code wird im Dashboard als Text angezeigt
-**Problem:** Mehrzeilige `f"""..."""`-Strings mit eingebetteten Variablen wurden von Streamlit teilweise als Text gerendert statt als HTML.  
-**Lösung:** HTML-Strings werden als zusammengesetzte Einzeiler gebaut, oder einzelne Elemente werden in separaten `st.markdown()`-Aufrufen ausgegeben.
+### Herausforderung 2: HTML-Code wird als Text angezeigt
+**Problem:** Mehrzeilige f-Strings mit Variablen wurden von Streamlit als Text statt HTML gerendert.  
+**Lösung:** HTML-Strings als zusammengesetzte Einzeiler oder in separaten `st.markdown()`-Aufrufen.
 
 ### Herausforderung 3: Stimmungsdaten gehen nach Neustart verloren
-**Problem:** `mood_df` wurde nur geladen wenn der Key nicht im Session State war. Nach einem Neustart wurde die CSV aus der Cloud nicht neu eingelesen.  
-**Lösung:** `mood_df` wird in `app.py` bei jedem Start frisch von SwitchDrive geladen (kein `if ... not in st.session_state`-Check).
+**Problem:** `mood_df` wurde nur einmalig geladen und nicht neu eingelesen.  
+**Lösung:** `mood_df` bei jedem App-Start frisch von SwitchDrive laden.
 
-### Herausforderung 4: Plotly-Zeitachse zeigt Timestamps statt Datum
-**Problem:** Pandas Datetime-Objekte wurden mit Uhrzeit (`2026-05-07 00:00:00`) auf der X-Achse dargestellt.  
-**Lösung:** Datum wird mit `.dt.strftime("%d.%m.%Y")` in einen sauberen String umgewandelt. Plotly rendert String-Kategorien ohne Zeitanteil.
+### Herausforderung 4: Plotly-Zeitachse zeigt Timestamps
+**Problem:** Pandas Datetime-Objekte wurden mit Uhrzeit auf der X-Achse dargestellt.  
+**Lösung:** Datum mit `.dt.strftime("%d.%m.%Y")` in sauberen String umwandeln.
 
 ### Herausforderung 5: fpdf2 unterstützt keine Emojis
-**Problem:** Beim PDF-Export erschien ein Fehler weil Helvetica keine Unicode-Emojis unterstützt.  
-**Lösung:** Alle Emojis und Sonderzeichen (✓, ✗) wurden im PDF-Code durch normalen Text ersetzt.
+**Problem:** Helvetica unterstützt keine Unicode-Emojis → Fehler beim PDF-Export.  
+**Lösung:** Alle Emojis im PDF-Code durch normalen Text ersetzt.
+
+### Herausforderung 6: Maskottchen-Variable vor `todays_meds` verwendet
+**Problem:** `todays_meds` war noch nicht definiert als Vita die Variable brauchte.  
+**Lösung:** `todays_meds` früher im Code berechnen, vor der Vita-Stimmungslogik.
 
 ---
 
 ## 7. Verwendete Bibliotheken
 
-| Bibliothek | Version | Verwendung |
-|---|---|---|
-| `streamlit` | aktuell | Web-Framework, UI-Komponenten, Session State |
-| `pandas` | aktuell | Datenverarbeitung, CSV-Import/Export |
-| `plotly` | aktuell | Interaktive Charts (Blutdruck, Blutzucker, Stimmung) |
-| `fpdf2` | aktuell | PDF-Generierung |
-| `webdav4` | aktuell | SwitchDrive-Anbindung via WebDAV |
+| Bibliothek | Verwendung |
+|---|---|
+| `streamlit` | Web-Framework, UI-Komponenten, Session State |
+| `pandas` | Datenverarbeitung, CSV-Import/Export |
+| `plotly` | Interaktive Charts (Blutdruck, Blutzucker, Stimmung) |
+| `fpdf2` | PDF-Generierung |
+| `webdav4` | SwitchDrive-Anbindung via WebDAV |
 
 ---
 
 ## 8. Reflexion
 
 ### Was gut funktioniert hat
-- Das modulare Aufbau mit separaten Views und Utils-Modulen macht den Code gut wartbar
-- Das Theme-System ist flexibel und visuell ansprechend
+- Das modulare Aufbau mit separaten Views und Utils macht den Code gut wartbar
+- Das Maskottchen und das Abzeichen-System geben der App eine einzigartige Persönlichkeit
 - Die Mehrsprachigkeit wurde durchgängig und konsequent umgesetzt
-- Die medizinischen Klassifizierungen (DGK-Leitlinien) geben der App eine professionelle Qualität
+- Die medizinischen Klassifizierungen (DGK-Leitlinien) geben der App professionelle Qualität
+- Das Theme-System mit 9 Farben und 3 Maskottchen ermöglicht echte Personalisierung
 
 ### Was schwierig war
 - Streamlits Rendering-Verhalten bei mehrzeiligem HTML erforderte viel Trial-and-Error
-- Die globale Theme-Injection (Sidebar) war eine nicht dokumentierte Einschränkung von Streamlit
-- Vollständige Mehrsprachigkeit bedeutete, jeden einzelnen String zu identifizieren und zu übersetzen
+- Die globale Theme-Injection (Sidebar) war eine nicht dokumentierte Einschränkung
+- SVG-Maskottchen mit konsistenter Qualität für alle 3 Charaktere und 4 Stimmungen zu erstellen
 
 ### Was man verbessern könnte
+- Konfetti-Animation beim Freischalten eines Achievements
 - Erinnerungen via E-Mail oder Push-Notification
-- Diagramme zum Blutdruckverlauf über mehrere Monate im PDF
 - Import von Medikamentendaten aus externen Quellen
-- Dunkel-Modus mit dynamischer Umschaltung
+- Mehr Maskottchen und Stimmungen
 
 ---
 
 ## 9. Fazit
 
-MediTrack ist eine vollständig funktionsfähige, professionell gestaltete Gesundheits-App, die weit über eine einfache CRUD-Applikation hinausgeht. Die Kombination aus medizinisch korrekten Klassifizierungen, mehrsprachiger Benutzeroberfläche, personalisiertem Design und Cloud-Datenspeicherung macht sie zu einer echten, praxistauglichen Anwendung.
+MediTrack ist eine vollständig funktionsfähige, professionell gestaltete Gesundheits-App, die weit über eine einfache CRUD-Applikation hinausgeht. Die Kombination aus medizinisch korrekten Klassifizierungen, mehrsprachiger Benutzeroberfläche, personalisiertem Design mit 9 Farbthemen sowie dem einzigartigen Maskottchen- und Abzeichen-System macht sie zu einer echten, praxistauglichen und gleichzeitig motivierenden Anwendung.
 
 ---
 

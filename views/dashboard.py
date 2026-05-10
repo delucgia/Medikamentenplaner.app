@@ -11,6 +11,7 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 from utils.translations import t
 from utils.themes import inject_theme, get_theme
+from utils.vita import mascot_svg, get_vita_mood
 
 inject_theme()
 theme = get_theme()
@@ -219,30 +220,70 @@ profile   = st.session_state.get("profile", {})
 firstname = profile.get("firstname", "")
 name_part = f", {firstname}!" if firstname else "!"
 
-st.markdown(f"## 👋 {t(greeting_key)}{name_part}")
-st.markdown(
-    f'<p style="color:#6b7280;margin-top:-0.5rem;margin-bottom:1rem">'
-    f'{date_label} — {t("dashboard_subtitle")}</p>',
-    unsafe_allow_html=True
-)
-
-# ── Streak-Banner ─────────────────────────────────────────────────────────────
+# ── Streak + Vita ────────────────────────────────────────────────────────────
 streak = compute_streak()
+
+# Letzte Gesundheitswerte für Vita-Stimmung
+bp_status_str = ""
+bs_status_str = ""
+if not bp_df.empty:
+    bl = bp_df.sort_values("date").iloc[-1]
+    bp_status_str, _ = classify_bp(int(bl["systolic"]), int(bl["diastolic"]))
+if not bs_df.empty:
+    bl2 = bs_df.sort_values("date").iloc[-1]
+    bs_status_str, _ = classify_bs(float(bl2["value"]))
+
+# todays_meds hier berechnen damit Vita es nutzen kann
+todays_meds = meds_df[meds_df["days"].apply(med_due_today)] if not meds_df.empty else pd.DataFrame()
+has_pending = any(
+    not intake_exists_today(r["id"]) for _, r in todays_meds.iterrows()
+) if not todays_meds.empty else False
+
+vita_mood, vita_msg = get_vita_mood(
+    hour=today_dt.hour,
+    streak=streak,
+    has_pending=has_pending,
+    bp_status=bp_status_str,
+    bs_status=bs_status_str,
+)
+vita_html = mascot_svg(vita_mood, size=90)
+
+col_greet, col_vita = st.columns([3, 1])
+with col_greet:
+    st.markdown(f"## 👋 {t(greeting_key)}{name_part}")
+    st.markdown(
+        f'<p style="color:#6b7280;margin-top:-0.5rem;margin-bottom:0.5rem">'
+        f'{date_label} — {t("dashboard_subtitle")}</p>',
+        unsafe_allow_html=True
+    )
+    # Vita Sprechblase
+    st.markdown(
+        f'<div style="background:{theme["metric_bg"]};border:1px solid {theme["border"]};'
+        f'border-radius:14px;border-bottom-left-radius:4px;padding:0.65rem 1rem;'
+        f'font-size:13px;color:#374151;margin-bottom:1rem;display:inline-block;max-width:95%">'
+        f'{vita_msg}</div>',
+        unsafe_allow_html=True
+    )
+with col_vita:
+    st.markdown(
+        f'<div style="display:flex;justify-content:center;align-items:flex-end;height:100%">'
+        f'{vita_html}</div>',
+        unsafe_allow_html=True
+    )
+
 if streak > 0:
-    st.markdown(f"""
-    <div style="background:{theme['gradient']};border-radius:16px;padding:1rem 1.5rem;
-                color:white;display:flex;align-items:center;gap:16px;margin-bottom:1rem">
-        <div style="font-size:2.5rem;font-weight:700;line-height:1">{streak}</div>
-        <div>
-            <div style="font-size:15px;font-weight:600">🔥 {t('dashboard_streak')}</div>
-            <div style="font-size:12px;opacity:0.85">{streak} {t('streak_days_label')}</div>
-        </div>
-        <div style="margin-left:auto;font-size:2rem">{'🔥' * min(streak, 5)}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="background:{theme["gradient"]};border-radius:16px;padding:1rem 1.5rem;'
+        f'color:white;display:flex;align-items:center;gap:16px;margin-bottom:1rem">'
+        f'<div style="font-size:2.5rem;font-weight:700;line-height:1">{streak}</div>'
+        f'<div><div style="font-size:15px;font-weight:600">🔥 {t("dashboard_streak")}</div>'
+        f'<div style="font-size:12px;opacity:0.85">{streak} {t("streak_days_label")}</div></div>'
+        f'<div style="margin-left:auto;font-size:2rem">{"🔥" * min(streak, 5)}</div></div>',
+        unsafe_allow_html=True
+    )
 
 # ── Metriken ──────────────────────────────────────────────────────────────────
-todays_meds = meds_df[meds_df["days"].apply(med_due_today)] if not meds_df.empty else pd.DataFrame()
+# todays_meds wurde bereits oben für Vita berechnet
 taken_today = sum(1 for _, r in todays_meds.iterrows() if intake_exists_today(r["id"]))
 total_today = len(todays_meds)
 pct_today   = int(taken_today / total_today * 100) if total_today > 0 else 0

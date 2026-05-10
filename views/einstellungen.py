@@ -6,6 +6,7 @@ Einstellungen: Sprache (DE/FR/IT/EN), Farbthema (9 Optionen).
 import streamlit as st
 from utils.translations import t, TRANSLATIONS
 from utils.themes import inject_theme, THEMES, get_theme
+from utils.vita import vita_svg, medi_svg, drcare_svg
 
 inject_theme()
 dm    = st.session_state["data_manager"]
@@ -93,11 +94,47 @@ st.markdown(f"""
 
 st.divider()
 
+# ── Maskottchen ───────────────────────────────────────────────────────────────
+st.markdown(f"#### 🐾 {t('settings_mascot')}")
+current_mascot = st.session_state.get("mascot", "vita")
+
+mascots = [
+    {"key": "vita",   "name": "Vita",     "desc": t("mascot_vita_desc"),   "svg": vita_svg("happy", 70)},
+    {"key": "medi",   "name": "Medi",     "desc": t("mascot_medi_desc"),   "svg": medi_svg("happy", 70)},
+    {"key": "drcare", "name": "Dr. Care", "desc": t("mascot_drcare_desc"), "svg": drcare_svg("happy", 70)},
+]
+
+mascot_cols = st.columns(3)
+for i, m in enumerate(mascots):
+    with mascot_cols[i]:
+        is_sel = current_mascot == m["key"]
+        border = f"2px solid {theme['primary']}" if is_sel else f"0.5px solid {theme['border']}"
+        bg     = theme["primary_light"] if is_sel else theme["card"]
+        st.markdown(
+            f'<div style="background:{bg};border:{border};border-radius:14px;'
+            f'padding:0.75rem;text-align:center;cursor:pointer">'
+            f'<div style="display:flex;justify-content:center">{m["svg"]}</div>'
+            f'<div style="font-size:13px;font-weight:600;color:#111827;margin-top:6px">{m["name"]}</div>'
+            f'<div style="font-size:11px;color:#6b7280;margin-top:2px">{m["desc"]}</div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+        if st.button(
+            f"✓ {m['name']}" if is_sel else m["name"],
+            key=f"mascot_{m['key']}",
+            use_container_width=True
+        ):
+            st.session_state["mascot"] = m["key"]
+            st.rerun()
+
+st.divider()
+
 # ── Speichern ─────────────────────────────────────────────────────────────────
 if st.button(t("save"), use_container_width=True):
     settings = {
         "language": st.session_state.get("language", "de"),
         "theme":    st.session_state.get("theme", "blue"),
+        "mascot":   st.session_state.get("mascot", "vita"),
     }
     try:
         dm.save_user_data(settings, "settings.json")

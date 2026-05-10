@@ -29,6 +29,15 @@ MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverläss
 ### 🔥 Streak-System
 - Motivierende Anzeige wie viele Tage in Folge alle Medikamente eingenommen wurden
 
+### 🏆 Abzeichen-System
+- 11 freischaltbare Achievements für Meilensteine (Streaks, Gesundheitsziele, Nutzung)
+- Eigene Seite mit Fortschrittsanzeige und Übersicht aller Abzeichen
+
+### 🐾 Maskottchen
+- Persönliches Maskottchen das durch die App begleitet und motiviert
+- 3 wählbare Charaktere: **Vita** (Herz), **Medi** (Pille), **Dr. Care** (Doktor)
+- 4 kontextabhängige Stimmungen: fröhlich, aufgeregt, besorgt, müde
+
 ### 📄 PDF-Export
 - Export von Einnahmen, Blutdruck, Blutzucker und Stimmung als PDF
 - Ideal für den nächsten Arztbesuch
@@ -39,6 +48,7 @@ MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverläss
 ### ⚙️ Personalisierung
 - **4 Sprachen:** 🇩🇪 Deutsch · 🇫🇷 Français · 🇮🇹 Italiano · 🇬🇧 English
 - **9 Farbthemen:** Ozean-Blau, Lila, Smaragd, Rosa, Sonnenschein, Türkis, Himmelblau, Minze, Lavendel
+- **3 Maskottchen:** Vita, Medi, Dr. Care
 
 ---
 
@@ -60,8 +70,25 @@ MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverläss
 | Pandas | Datenverarbeitung |
 | Plotly | Interaktive Charts |
 | fpdf2 | PDF-Generierung |
+| SVG | Maskottchen-Illustration |
 | SwitchDrive (WebDAV) | Cloud-Datenspeicherung |
 | GitHub | Versionskontrolle |
+
+---
+
+## ▶️ Installation und Start
+
+```bash
+# Repository klonen
+git clone https://github.com/your-repo/meditrack.git
+cd meditrack
+
+# Abhängigkeiten installieren
+pip install -r requirements.txt
+
+# App starten
+streamlit run app.py
+```
 
 ---
 

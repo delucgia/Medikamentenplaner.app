@@ -28,6 +28,8 @@ if "settings_loaded" not in st.session_state:
             st.session_state["language"] = saved["language"]
         if saved.get("theme"):
             st.session_state["theme"] = saved["theme"]
+        if saved.get("mascot"):
+            st.session_state["mascot"] = saved["mascot"]
     except Exception:
         pass
     st.session_state["settings_loaded"] = True
@@ -130,6 +132,8 @@ st.session_state["data_manager"] = data_manager
 from utils.themes import inject_theme
 from utils.translations import t
 inject_theme()
+if "mascot" not in st.session_state:
+    st.session_state["mascot"] = "vita"
 
 # ---------------------------------------------------------
 # Navigation
@@ -141,8 +145,9 @@ pg_blutdruck   = st.Page("views/blutdruck.py",    title=t("nav_blood_pressure"),
 pg_blutzucker  = st.Page("views/blutzucker.py",   title=t("nav_blood_sugar"),    icon="🩸")
 pg_stimmung    = st.Page("views/stimmung.py",     title=t("nav_mood"),           icon="😊")
 pg_profil      = st.Page("views/profil.py",       title=t("nav_profile"),        icon="👤")
-pg_settings    = st.Page("views/einstellungen.py",title=t("nav_settings"),       icon="⚙️")
-pg_pdf         = st.Page("views/pdf_export.py",    title="PDF-Export",            icon="📄")
+pg_settings      = st.Page("views/einstellungen.py", title=t("nav_settings"),    icon="⚙️")
+pg_pdf           = st.Page("views/pdf_export.py",   title="PDF-Export",          icon="📄")
+pg_achievements  = st.Page("views/achievements.py", title=t("nav_achievements"), icon="🏆")
 
 pg = st.navigation([
     pg_dashboard,
@@ -151,6 +156,7 @@ pg = st.navigation([
     pg_blutdruck,
     pg_blutzucker,
     pg_stimmung,
+    pg_achievements,
     pg_profil,
     pg_settings,
     pg_pdf,
