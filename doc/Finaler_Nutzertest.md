@@ -106,13 +106,9 @@ Bestätigt. Die finale App wurde insgesamt sehr positiv aufgenommen. Besonders d
 
 **Was war schlecht?**
 
-• **Medizinische Erklärtexte nur auf Deutsch** – Disclaimer-Hinweis ist hilfreich, aber für nicht-deutschsprachige Nutzer*innen wären Übersetzungen wertvoll (aus Sicherheitsgründen verständlich, aber nicht ideal für alle)
-
 • **Kein Tutorial / kein Onboarding** – beim ersten Start wäre eine kurze Einführung hilfreich
 
 • **Wochentage in der Medikamenten-Übersicht** – die Grossmutter fragte einmal nach was „Lun–Ven" bedeutet (war klar, aber sie war kurz unsicher)
-
-• **Stimmungs-Verlaufschart** – etwas klein bei langen Datumsangaben, manche Daten überlappen leicht
 
 • **Achievements** – manche Bedingungen sind nicht selbsterklärend („Blutdruck 7× optimal" – wann zählt das?)
 
@@ -126,13 +122,9 @@ Bestätigt. Die finale App wurde insgesamt sehr positiv aufgenommen. Besonders d
 
 • **Erklärungs-Tooltips** bei Achievements (Klick → kurze Beschreibung wann freigeschaltet)
 
-• **Spracheinstellungen abgespeichert pro Familienmitglied** (sie nutzt es auch für ihren Mann)
-
 • **Druckfreundliche PDF-Vorschau** vor dem Download
 
 • **Push-Notifications oder E-Mail-Erinnerungen** für Medikamente
-
-• **Stimme aufnehmen statt tippen** – für Kommentare bei der Stimmung, hilfreich für Personen mit Handproblemen
 
 • **Einfacherer Wochentage-Selector** – z.B. „Jeden Tag" / „Werktage" / „Wochenende" als Schnellauswahl
 
@@ -140,13 +132,7 @@ Bestätigt. Die finale App wurde insgesamt sehr positiv aufgenommen. Besonders d
 
 • **Datenschutz-Sorgen** – Die Grossmutter fragte: *„Wo werden meine Gesundheitsdaten gespeichert?"* → Cloud-Hinweis sollte prominenter erklärt werden
 
-• **Vertrauen in medizinische Klassifizierungen** – sie hat den Texten geglaubt, aber eine Quellenangabe direkt unter der Statusmeldung wäre stärker
-
 • **Vergesslichkeit beim PDF-Export** – muss daran gedacht werden, dass man vor jedem Arzttermin einen exportiert. Eine automatische monatliche Zusammenfassung als E-Mail wäre hilfreich
-
-• **Zu viele Sidebar-Einträge** – mit Achievements und PDF-Export sind es jetzt 10 Punkte. Bei kleinen Bildschirmen schwierig
-
-• **Maskottchen verschwindet bei vielen Daten** – auf langen Dashboard-Seiten muss man scrollen um Vita zu sehen
 
 • **Achievement-Animation fehlt** – beim Freischalten wäre eine kleine Konfetti-Animation oder ein Toast-Popup motivierender als die stille Erscheinung in der Sidebar
 

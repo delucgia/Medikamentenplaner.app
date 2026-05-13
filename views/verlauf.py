@@ -8,6 +8,7 @@ import html
 import streamlit as st
 import pandas as pd
 from datetime import date, datetime, timedelta, time as dtime
+from functions.time import get_week_range
 from utils.translations import t
 from utils.themes import get_theme
 
@@ -64,11 +65,6 @@ def save_intakes():
         st.session_state["intakes_df"], "intakes.csv"
     )
 
-
-def get_week_range(dt):
-    monday = dt - timedelta(days=dt.weekday())
-    sunday = monday + timedelta(days=6)
-    return monday, sunday
 
 
 # ── Seite ─────────────────────────────────────────────────────────────────────
