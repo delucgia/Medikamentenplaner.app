@@ -50,7 +50,11 @@ if "mood_df" not in st.session_state:
 # ── Seite ─────────────────────────────────────────────────────────────────────
 st.markdown(f"## 😊 {t('mood_title')}")
 st.markdown(
-    f'<p style="color:#6b7280">{t("mood_subtitle")}</p>',
+    f'<p style="color:#374151;font-size:15px;font-weight:500;margin-top:-0.5rem">{t("mood_subtitle")}</p>',
+    unsafe_allow_html=True
+)
+st.markdown(
+    f'<p style="color:#6b7280;font-size:13px;line-height:1.5">{t("mood_intro")}</p>',
     unsafe_allow_html=True
 )
 st.write("")

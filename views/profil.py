@@ -110,9 +110,14 @@ with tab_medical:
         current_blood = profile.get("blood_type","—")
         blood_idx     = blood_options.index(current_blood) if current_blood in blood_options else 0
         blood_type_in = st.selectbox(t("profile_blood_type"), options=blood_options, index=blood_idx)
-        allergies_in  = st.text_area(t("profile_allergies"), value=profile.get("allergies",""), height=100)
+        allergies_in  = st.text_area(t("profile_allergies"), value=profile.get("allergies",""), height=80)
+        conditions_in = st.text_area(t("profile_conditions"), value=profile.get("conditions",""), height=80)
         if st.form_submit_button(t("save"), use_container_width=True):
-            profile.update({"blood_type": blood_type_in, "allergies": allergies_in.strip()})
+            profile.update({
+                "blood_type": blood_type_in,
+                "allergies":  allergies_in.strip(),
+                "conditions": conditions_in.strip(),
+            })
             st.session_state["profile"] = profile
             dm.save_user_data(profile, "profile.json")
             st.success(t("profile_saved"))
@@ -152,5 +157,6 @@ if any([profile.get("firstname"), profile.get("blood_type"), profile.get("emerge
     row(t("profile_doctor"),          profile.get("doctor",""))
     row(t("profile_blood_type"),      profile.get("blood_type",""))
     row(t("profile_allergies"),       profile.get("allergies",""))
+    row(t("profile_conditions"),      profile.get("conditions",""))
     row(t("profile_emergency"),       profile.get("emergency",""))
     row(t("profile_emergency_phone"), profile.get("emergency_phone",""))
