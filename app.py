@@ -19,6 +19,26 @@ login_manager = LoginManager(data_manager)
 login_manager.login_register()
 
 # ---------------------------------------------------------
+# User-Wechsel erkennen → Session State zurücksetzen
+# ---------------------------------------------------------
+current_user = st.session_state.get("username", None)
+if "active_user" not in st.session_state:
+    st.session_state["active_user"] = current_user
+elif st.session_state["active_user"] != current_user:
+    # User hat gewechselt → alle Daten aus Session State löschen
+    keys_to_clear = [
+        "medications_df", "intakes_df", "blood_pressure_df", "blood_sugar_df",
+        "mood_df", "profile", "settings_loaded", "language", "theme", "mascot",
+        "editing_medication_id", "editing_intake_id", "selected_mood_key",
+        "detail_medication_id", "last_success_message", "pdf_exported_once",
+    ]
+    for k in keys_to_clear:
+        if k in st.session_state:
+            del st.session_state[k]
+    st.session_state["active_user"] = current_user
+    st.rerun()
+
+# ---------------------------------------------------------
 # Einstellungen laden (Sprache, Theme)
 # ---------------------------------------------------------
 if "settings_loaded" not in st.session_state:

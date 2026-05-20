@@ -5,13 +5,17 @@ Verwendet fpdf2. Keine Emojis (Helvetica-Kompatibilitaet).
 """
 
 from datetime import datetime
+import pandas as pd
 
 
 def _sanitize(text) -> str:
     """Entfernt Unicode-Zeichen die fpdf2/Helvetica nicht darstellen kann."""
     if text is None:
-        return ""
-    s = str(text)
+        return "-"
+    s = str(text).strip()
+    # NaN / leere Werte als Platzhalter
+    if s.lower() in ["nan", "none", "nat", ""]:
+        return "-"
     # Unicode-Minus, Gedankenstrich, Bindestrich-Varianten -> normaler Bindestrich
     s = s.replace(chr(8722), "-").replace(chr(8211), "-").replace(chr(8212), "-")
     # Smart quotes -> normale
@@ -138,7 +142,7 @@ def generate_pdf(
         for i, (_, row) in enumerate(df.iterrows()):
             confirmed = str(row.get("confirmed","")).lower() in ["true","1","yes"]
             status    = "Bestaetigt" if confirmed else "Ausstehend"
-            note      = str(row.get("note",""))[:30] if row.get("note") and str(row.get("note","")).strip() else "-"
+            note      = str(row.get("note",""))[:30] if pd.notna(row.get("note")) and str(row.get("note","")).strip() not in ["", "nan", "None"] else "-"
             _table_row(pdf, [
                 str(row.get("date",""))[:10],
                 str(row.get("medication_name",""))[:28],
@@ -234,7 +238,7 @@ def generate_pdf(
         for i, (_, row) in enumerate(df.iterrows()):
             mood_key   = str(row.get("mood_key","okay"))
             mood_label = MOOD_LABELS.get(mood_key, str(row.get("mood_label","")))
-            note       = str(row.get("note",""))[:55] if row.get("note") and str(row.get("note","")).strip() else "-"
+            note       = str(row.get("note",""))[:55] if pd.notna(row.get("note")) and str(row.get("note","")).strip() not in ["", "nan", "None"] else "-"
             _table_row(pdf, [
                 str(row.get("date",""))[:10],
                 mood_label,
