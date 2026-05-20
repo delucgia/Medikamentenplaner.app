@@ -1,7 +1,6 @@
 """
 views/pdf_export.py
 PDF-Export: Nutzer wählt welche Daten exportiert werden sollen.
-Vollständig übersetzt via utils/translations.py
 """
 
 import streamlit as st
@@ -12,14 +11,12 @@ from utils.themes import inject_theme, get_theme
 inject_theme()
 theme = get_theme()
 
+# ── Titel ─────────────────────────────────────────────────────────────────────
 st.markdown(f"## 📄 {t('pdf_title')}")
-st.markdown(
-    f'<p style="color:#6b7280">{t("pdf_subtitle")}</p>',
-    unsafe_allow_html=True
-)
+st.caption(t("pdf_subtitle"))
 st.write("")
 
-# ── Verfügbare Daten prüfen ───────────────────────────────────────────────────
+# ── Daten laden ───────────────────────────────────────────────────────────────
 intakes_df = st.session_state.get("intakes_df", pd.DataFrame())
 bp_df      = st.session_state.get("blood_pressure_df", pd.DataFrame())
 bs_df      = st.session_state.get("blood_sugar_df", pd.DataFrame())
@@ -36,13 +33,7 @@ if not any([has_intakes, has_bp, has_bs, has_mood]):
     st.stop()
 
 # ── Auswahl ───────────────────────────────────────────────────────────────────
-st.markdown(f"""
-<div style="background:{theme['card']};border:1px solid {theme['border']};
-            border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1rem">
-    <div style="font-size:14px;font-weight:600;color:#111827;margin-bottom:1rem">
-        {t('pdf_what')}
-    </div>
-""", unsafe_allow_html=True)
+st.markdown(f"**{t('pdf_what')}**")
 
 col1, col2 = st.columns(2)
 
@@ -53,7 +44,10 @@ with col1:
             value=True
         )
     else:
-        st.checkbox(f"💊 {t('pdf_intakes')} ({t('pdf_no_data')})", value=False, disabled=True)
+        st.checkbox(
+            f"💊 {t('pdf_intakes')} ({t('pdf_no_data')})",
+            value=False, disabled=True
+        )
         inc_intakes = False
 
     if has_bp:
@@ -62,7 +56,10 @@ with col1:
             value=True
         )
     else:
-        st.checkbox(f"❤️ {t('health_bp')} ({t('pdf_no_data')})", value=False, disabled=True)
+        st.checkbox(
+            f"❤️ {t('health_bp')} ({t('pdf_no_data')})",
+            value=False, disabled=True
+        )
         inc_bp = False
 
 with col2:
@@ -72,7 +69,10 @@ with col2:
             value=True
         )
     else:
-        st.checkbox(f"🩸 {t('health_bs')} ({t('pdf_no_data')})", value=False, disabled=True)
+        st.checkbox(
+            f"🩸 {t('health_bs')} ({t('pdf_no_data')})",
+            value=False, disabled=True
+        )
         inc_bs = False
 
     if has_mood:
@@ -81,25 +81,25 @@ with col2:
             value=True
         )
     else:
-        st.checkbox(f"😊 {t('mood_title')} ({t('pdf_no_data')})", value=False, disabled=True)
+        st.checkbox(
+            f"😊 {t('mood_title')} ({t('pdf_no_data')})",
+            value=False, disabled=True
+        )
         inc_mood = False
 
-st.markdown("</div>", unsafe_allow_html=True)
+st.write("")
 
 # ── Profil-Info ───────────────────────────────────────────────────────────────
 firstname = profile.get("firstname", "")
 lastname  = profile.get("lastname", "")
 fullname  = f"{firstname} {lastname}".strip()
+doctor    = profile.get("doctor", "")
 
-if fullname or profile.get("doctor"):
-    st.markdown(f"""
-    <div style="background:{theme['metric_bg']};border:1px solid {theme['border']};
-                border-radius:12px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:13px">
-        <span style="color:#6b7280">{t('pdf_for')}: </span>
-        <strong>{fullname or t('pdf_unknown')}</strong>
-        {f" · {profile.get('doctor','')}" if profile.get('doctor') else ""}
-    </div>
-    """, unsafe_allow_html=True)
+if fullname or doctor:
+    info_text = f"**{t('pdf_for')}:** {fullname or t('pdf_unknown')}"
+    if doctor:
+        info_text += f"  ·  {doctor}"
+    st.info(info_text)
 else:
     st.info(f"💡 {t('pdf_tip')} 👤 {t('nav_profile')} {t('pdf_tip2')}")
 
@@ -111,13 +111,11 @@ if inc_bs and has_bs:           selected_sections.append(f"🩸 {t('health_bs')}
 if inc_mood and has_mood:       selected_sections.append(f"😊 {t('mood_title')}")
 
 if selected_sections:
-    st.markdown(
-        f'<p style="font-size:13px;color:#6b7280">{t("pdf_selected")}: '
-        f'{" · ".join(selected_sections)}</p>',
-        unsafe_allow_html=True
-    )
+    st.caption(f"{t('pdf_selected')}: {'  ·  '.join(selected_sections)}")
 
 # ── Export-Button ─────────────────────────────────────────────────────────────
+st.write("")
+
 if not selected_sections:
     st.warning(t("pdf_select_min"))
 else:

@@ -184,7 +184,35 @@ else:
     df_plot = mood_df.copy()
     df_plot["date"]       = pd.to_datetime(df_plot["date"], errors="coerce")
     df_plot["mood_value"] = pd.to_numeric(df_plot["mood_value"], errors="coerce")
-    df_plot = df_plot.dropna().sort_values("date").tail(30)
+    df_plot = df_plot.dropna(subset=["date", "mood_value"]).sort_values("date")
+
+    # ── Zeitraum-Filter ───────────────────────────────────────────────────────
+    filter_options = {
+        "7":   t("filter_7days"),
+        "30":  t("filter_30days"),
+        "90":  t("filter_90days"),
+        "365": t("filter_year"),
+        "all": t("filter_all"),
+    }
+    selected = st.radio(
+        t("filter_label") if "filter_label" in dir() else "Zeitraum",
+        options=list(filter_options.keys()),
+        format_func=lambda k: filter_options[k],
+        horizontal=True,
+        index=1,  # Standard: 30 Tage
+        key="mood_chart_filter",
+    )
+
+    from datetime import datetime as _dt
+    if selected != "all":
+        days = int(selected)
+        cutoff = pd.Timestamp.today() - pd.Timedelta(days=days)
+        df_plot = df_plot[df_plot["date"] >= cutoff]
+
+    if df_plot.empty:
+        st.info(t("no_intakes_period"))
+        st.stop()
+
     df_plot["date_str"] = df_plot["date"].dt.strftime("%d.%m.%Y")
 
     point_colors = df_plot["mood_value"].apply(
