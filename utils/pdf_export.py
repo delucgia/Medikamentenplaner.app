@@ -7,6 +7,24 @@ Verwendet fpdf2. Keine Emojis (Helvetica-Kompatibilitaet).
 from datetime import datetime
 
 
+def _sanitize(text) -> str:
+    """Entfernt Unicode-Zeichen die fpdf2/Helvetica nicht darstellen kann."""
+    if text is None:
+        return ""
+    s = str(text)
+    # Unicode-Minus, Gedankenstrich, Bindestrich-Varianten -> normaler Bindestrich
+    s = s.replace(chr(8722), "-").replace(chr(8211), "-").replace(chr(8212), "-")
+    # Smart quotes -> normale
+    s = s.replace(chr(8216), "'").replace(chr(8217), "'")
+    s = s.replace(chr(8220), '"').replace(chr(8221), '"')
+    # Bullet, Ellipsis, andere typografische Zeichen
+    s = s.replace(chr(8226), "*").replace(chr(8230), "...")
+    s = s.replace(chr(160), " ")  # non-breaking space
+    # Alle übrigen Zeichen ausserhalb Latin-1 entfernen (fpdf2 unterstützt nur Latin-1)
+    s = "".join(c if ord(c) < 256 else "?" for c in s)
+    return s
+
+
 def _header(pdf, title: str, profile: dict):
     """Zeichnet den Seitenkopf."""
     pdf.set_fill_color(37, 99, 235)
@@ -19,11 +37,11 @@ def _header(pdf, title: str, profile: dict):
     pdf.set_y(22)
     pdf.set_font("Helvetica", "B", 16)
     pdf.set_text_color(17, 24, 39)
-    pdf.cell(0, 9, title, new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 9, _sanitize(title), new_x="LMARGIN", new_y="NEXT")
 
     pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(107, 114, 128)
-    pdf.cell(0, 5, f"Erstellt am: {datetime.now().strftime('%d.%m.%Y, %H:%M Uhr')}",
+    pdf.cell(0, 5, _sanitize(f"Erstellt am: {datetime.now().strftime('%d.%m.%Y, %H:%M Uhr')}"),
              new_x="LMARGIN", new_y="NEXT")
 
     firstname = profile.get("firstname", "")
@@ -33,13 +51,13 @@ def _header(pdf, title: str, profile: dict):
     if fullname:                          parts.append(f"Patient/in: {fullname}")
     if profile.get("birthdate"):          parts.append(f"Geb.: {profile['birthdate']}")
     if profile.get("doctor"):             parts.append(f"Arzt: {profile['doctor']}")
-    if profile.get("blood_type") and profile["blood_type"] != "-":
-        parts.append(f"Blutgruppe: {profile['blood_type']}")
+    if profile.get("blood_type") and profile["blood_type"] not in ["-", "—", "−"]:
+        parts.append(f"Blutgruppe: {profile['blood_type'].replace(chr(8722), '-').replace(chr(8211), '-').replace(chr(8212), '-')}")
     if parts:
-        pdf.cell(0, 5, "  |  ".join(parts), new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 5, _sanitize("  |  ".join(parts)), new_x="LMARGIN", new_y="NEXT")
     if profile.get("emergency"):
         pdf.cell(0, 5,
-                 f"Notfall: {profile['emergency']}  {profile.get('emergency_phone','')}",
+                 _sanitize(f"Notfall: {profile['emergency']}  {profile.get('emergency_phone','')}"),
                  new_x="LMARGIN", new_y="NEXT")
 
     pdf.ln(3)
@@ -53,7 +71,7 @@ def _section_title(pdf, title: str, r=37, g=99, b=235):
     pdf.set_fill_color(r, g, b)
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Helvetica", "B", 10)
-    pdf.cell(0, 7, f"  {title}", new_x="LMARGIN", new_y="NEXT", fill=True)
+    pdf.cell(0, 7, _sanitize(f"  {title}"), new_x="LMARGIN", new_y="NEXT", fill=True)
     pdf.set_text_color(17, 24, 39)
     pdf.ln(2)
 
@@ -63,7 +81,7 @@ def _table_header(pdf, headers, widths, fr=239, fg=246, fb=255):
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(37, 99, 235)
     for h, w in zip(headers, widths):
-        pdf.cell(w, 7, h, border=1, fill=True)
+        pdf.cell(w, 7, _sanitize(h), border=1, fill=True)
     pdf.ln()
     pdf.set_text_color(17, 24, 39)
 
@@ -72,7 +90,7 @@ def _table_row(pdf, values, widths, idx):
     pdf.set_fill_color(249, 250, 251) if idx % 2 == 0 else pdf.set_fill_color(255, 255, 255)
     pdf.set_font("Helvetica", "", 9)
     for val, w in zip(values, widths):
-        pdf.cell(w, 6, str(val)[:45], border=1, fill=True)
+        pdf.cell(w, 6, _sanitize(val)[:45], border=1, fill=True)
     pdf.ln()
 
 
