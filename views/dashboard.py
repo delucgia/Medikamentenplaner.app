@@ -5,7 +5,6 @@ Einnahmetreue, Trend-Analyse, letzte Gesundheitswerte.
 Vollständig übersetzt via utils/translations.py
 """
 
-import html
 import streamlit as st
 import pandas as pd
 from datetime import date, datetime, timedelta
@@ -13,153 +12,12 @@ from utils.translations import t
 from utils.themes import inject_theme, get_theme
 from utils.vita import mascot_svg, get_vita_mood
 from functions.format_helpers import e, is_confirmed, format_days, WEEKDAYS_DE_SHORT
-from functions.data_helpers import save_intakes, med_due_today, intake_exists_today, compute_streak, compute_trend
-from functions.health_classifications import classify_bp, classify_bs
+from functions.data_helpers import save_intakes, save_intake, med_due_today, intake_exists_today, compute_streak, compute_trend
+from functions.health_classifications import classify_bp, classify_bs, bp_color, bs_color
 
 inject_theme()
 theme = get_theme()
 
-
-def e(text):
-    return html.escape(str(text))
-
-
-def get_today_day_short():
-    """Gibt das heutige Wochentag-Kürzel in der aktuellen Sprache zurück."""
-    shorts = t("weekdays_short").split(",")
-    return shorts[datetime.today().weekday()]
-
-
-
-
-def med_due_today(days_str):
-    """Prüft ob ein Medikament heute fällig ist (DE-Kürzel intern)."""
-    if not days_str or pd.isna(days_str):
-        return False
-    today_de = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"][datetime.today().weekday()]
-    return today_de in [d.strip() for d in str(days_str).split(",")]
-
-
-def is_confirmed(val):
-    return str(val).strip().lower() in ["true", "1", "yes"]
-
-
-def intake_exists_today(medication_id):
-    """Prüft ob für dieses Medikament heute bereits eine Einnahme existiert."""
-    df = st.session_state["intakes_df"]
-    if df.empty:
-        return False
-    today = date.today().isoformat()
-    return not df[
-        (df["medication_id"] == medication_id) & (df["date"] == today)
-    ].empty
-
-
-def next_id(df):
-    if df.empty or "id" not in df.columns:
-        return 1
-    return int(df["id"].max()) + 1
-
-
-def save_intake(medication_id, med_name, intake_date, intake_time, confirmed, note):
-    """Speichert eine neue Einnahme."""
-    data_manager = st.session_state["data_manager"]
-    df = st.session_state["intakes_df"]
-    new_row = pd.DataFrame([{
-        "id": next_id(df),
-        "medication_id": medication_id,
-        "medication_name": med_name,
-        "date": intake_date.isoformat(),
-        "time": intake_time,
-        "confirmed": confirmed,
-        "note": note,
-        "created_at": pd.Timestamp.now(),
-    }])
-    updated = pd.concat([df, new_row], ignore_index=True)
-    st.session_state["intakes_df"] = updated
-    data_manager.save_user_data(updated, "intakes.csv")
-
-
-def classify_bp(systolic, diastolic):
-    """Klassifiziert einen Blutdruckwert."""
-    if systolic < 100 or diastolic < 60:
-        return t("bp_hypo"), "status-hypo"
-    if systolic >= 180 or diastolic >= 110:
-        return t("bp_hyp3"), "status-crit"
-    if systolic >= 160 or diastolic >= 100:
-        return t("bp_hyp2"), "status-crit"
-    if systolic >= 140 or diastolic >= 90:
-        return t("bp_hyp1"), "status-warn"
-    if systolic >= 130 or diastolic >= 85:
-        return t("bp_highnorm"), "status-warn"
-    if systolic >= 120 or diastolic >= 80:
-        return t("bp_normal"), "status-ok"
-    return t("bp_optimal"), "status-ok"
-
-
-def classify_bs(value):
-    """Klassifiziert einen Blutzuckerwert."""
-    if value < 3.0:
-        return t("bs_crit_low"), "status-crit"
-    if value < 3.9:
-        return t("bs_warn_low"), "status-warn"
-    if value <= 5.5:
-        return t("bs_normal"), "status-ok"
-    if value < 7.0:
-        return t("bs_warn_high"), "status-warn"
-    return t("bs_crit_high"), "status-crit"
-
-
-def compute_streak():
-    """Berechnet den Streak (inkl. heute)."""
-    df = st.session_state["intakes_df"]
-    meds = st.session_state["medications_df"]
-    if df.empty or meds.empty:
-        return 0
-        streak = 0
-    check_date = date.today()
-    for _ in range(365):
-        day_name = WEEKDAYS_DE_SHORT[check_date.weekday()]
-        due_meds = meds[meds["days"].apply(
-            lambda d: day_name in [x.strip() for x in str(d).split(",")]
-            if pd.notna(d) else False
-        )]
-        if due_meds.empty:
-            check_date -= timedelta(days=1)
-            continue
-        day_intakes = df[df["date"].astype(str) == check_date.isoformat()]
-        all_confirmed = all(
-            not day_intakes[
-                (day_intakes["medication_id"] == mid) &
-                (day_intakes["confirmed"].apply(is_confirmed))
-            ].empty
-            for mid in due_meds["id"]
-        )
-        if all_confirmed:
-            streak += 1
-            check_date -= timedelta(days=1)
-        else:
-            break
-    return streak
-
-
-def compute_trend(df, value_col, days=7):
-    """Berechnet ob ein Wert steigend, sinkend oder stabil ist."""
-    if df is None or df.empty or len(df) < 2:
-        return None
-    df2 = df.copy()
-    df2["date_dt"] = pd.to_datetime(df2["date"], errors="coerce")
-    recent = df2.sort_values("date_dt").tail(days)
-    if len(recent) < 2:
-        return None
-    mid = len(recent) // 2
-    avg1 = recent.head(mid)[value_col].mean()
-    avg2 = recent.tail(mid)[value_col].mean()
-    diff = avg2 - avg1
-    threshold = recent[value_col].std() * 0.3 if recent[value_col].std() > 0 else 1
-    if abs(diff) < threshold:
-        return "stable"
-    return "up" if diff > 0 else "down"
 
 
 def trend_html(direction, good="down"):
@@ -459,7 +317,7 @@ with col_right:
         bp_last  = bp_df.sort_values("date").iloc[-1]
         sys_val  = int(bp_last["systolic"])
         dia_val  = int(bp_last["diastolic"])
-        bp_status, bp_css = classify_bp(sys_val, dia_val)
+        bp_status, _ = classify_bp(sys_val, dia_val)
         bp_trend = compute_trend(bp_df.copy().rename(columns={"systolic": "value"}), "value")
         bp_trend_str = trend_html(bp_trend, good="down")
 
@@ -467,7 +325,7 @@ with col_right:
             st.caption(f"❤️ {t('health_bp').upper()}")
             st.markdown(f"**{sys_val} / {dia_val}** mmHg")
             st.markdown(
-                f'<span style="font-size:12px;font-weight:600;color:{css_color_map.get(bp_css, "#6b7280")}">'
+                f'<span style="font-size:12px;font-weight:600;color:{bp_color(bp_status)}">'
                 f'{e(bp_status)}</span>',
                 unsafe_allow_html=True
             )
@@ -483,7 +341,7 @@ with col_right:
     if not bs_df.empty:
         bs_last  = bs_df.sort_values("date").iloc[-1]
         bs_val   = float(bs_last["value"])
-        bs_status, bs_css = classify_bs(bs_val)
+        bs_status, _ = classify_bs(bs_val)
         bs_trend = compute_trend(bs_df.copy(), "value")
         bs_trend_str = trend_html(bs_trend, good="stable")
 
@@ -491,7 +349,7 @@ with col_right:
             st.caption(f"🩸 {t('health_bs').upper()}")
             st.markdown(f"**{bs_val:.1f}** mmol/l")
             st.markdown(
-                f'<span style="font-size:12px;font-weight:600;color:{css_color_map.get(bs_css, "#6b7280")}">'
+                f'<span style="font-size:12px;font-weight:600;color:{bs_color(bs_status)}">'
                 f'{e(bs_status)}</span>',
                 unsafe_allow_html=True
             )

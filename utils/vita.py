@@ -264,23 +264,46 @@ def get_vita_mood(
     bad_keywords = [
         "kritisch", "critique", "critico", "critically",
         "hypertonie", "hypertension", "ipertensione",
+        "hypotonie", "hypotension", "ipotensione",
         "auffällig", "anormal", "anomalo", "abnormally",
+        "grad 1", "grad 2", "grad 3",
+        "hoch-normal", "hoch normal",
     ]
-    bp_bad = any(kw in bp_status.lower() for kw in bad_keywords)
-    bs_bad = any(kw in bs_status.lower() for kw in bad_keywords)
+    good_keywords = [
+        "optimal", "normal", "normale", "ottimale",
+    ]
+    bp_bad  = any(kw in bp_status.lower() for kw in bad_keywords)
+    bs_bad  = any(kw in bs_status.lower() for kw in bad_keywords)
+    # "gut" nur wenn explizit ein guter Status und kein schlechter
+    bp_good = bp_status and not bp_bad and any(kw in bp_status.lower() for kw in good_keywords)
+    bs_good = bs_status and not bs_bad and any(kw in bs_status.lower() for kw in good_keywords)
 
+    # 1. Schlechte Werte → besorgt
     if bp_bad or bs_bad:
         return "worried", t("vita_worried_health")
 
+    # 2. Ausstehende Medikamente → besorgt
     if has_pending:
         return "worried", t("vita_pending")
 
+    # 3. Gute Gesundheitswerte → fröhlich loben
+    if bp_good or bs_good:
+        return "happy", t("vita_good_health")
+
+    # 4. Abend → müde
     if hour >= 20 or hour < 6:
         return "sleepy", t("vita_sleepy")
 
+    # 5. Kleiner Streak → motivierend
     if streak >= 3:
         return "happy", t("vita_streak_small").format(streak=streak)
 
+    # 6. Keine Daten vorhanden → Begrüssung "Hallo ich bin Vita"
+    has_any_data = bool(bp_status or bs_status or streak > 0 or has_pending)
+    if not has_any_data:
+        return "happy", t("vita_intro")
+
+    # 7. Sonst: Tageszeit-Begrüssung
     if hour < 12:
         return "happy", t("vita_morning")
     elif hour < 17:

@@ -10,28 +10,24 @@ from utils.translations import t
 def classify_bp(systolic, diastolic):
     """
     Klassifiziert Blutdruckwerte nach DGK-Leitlinien.
-    Erkennt auch Sonderfälle (isolierte systolische/diastolische Hypertonie).
-    Gibt (status_key, status_text) zurück.
+    Gibt (status_text, status_text) zurück (zweimal gleich für einfaches Entpacken).
+    Sonderfälle werden separat in der View behandelt.
     """
-    # Sonderfälle zuerst prüfen
-    if systolic >= 140 and diastolic < 90:
-        return t("bp_isolated_sys"), t("bp_isolated_sys")
-    if systolic < 140 and diastolic >= 90:
-        return t("bp_isolated_dia"), t("bp_isolated_dia")
-
-    if systolic >= 180 or diastolic >= 110:
-        return t("bp_hyp3"), t("bp_hyp3")
-    if systolic >= 160 or diastolic >= 100:
-        return t("bp_hyp2"), t("bp_hyp2")
-    if systolic >= 140 or diastolic >= 90:
-        return t("bp_hyp1"), t("bp_hyp1")
-    if systolic >= 130 or diastolic >= 85:
-        return t("bp_highnorm"), t("bp_highnorm")
-    if systolic >= 120 or diastolic >= 80:
-        return t("bp_normal"), t("bp_normal")
-    if systolic < 100 and diastolic < 60:
-        return t("bp_hypo"), t("bp_hypo")
-    return t("bp_optimal"), t("bp_optimal")
+    if systolic < 100 or diastolic < 60:
+        status = t("bp_hypo")
+    elif systolic >= 180 or diastolic >= 110:
+        status = t("bp_hyp3")
+    elif systolic >= 160 or diastolic >= 100:
+        status = t("bp_hyp2")
+    elif systolic >= 140 or diastolic >= 90:
+        status = t("bp_hyp1")
+    elif systolic >= 130 or diastolic >= 85:
+        status = t("bp_highnorm")
+    elif systolic >= 120 or diastolic >= 80:
+        status = t("bp_normal")
+    else:
+        status = t("bp_optimal")
+    return status, status
 
 
 def classify_bs(value):

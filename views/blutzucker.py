@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from datetime import date
 from utils.translations import t
 from functions.format_helpers import e
-from functions.data_helpers import save_bs
+from functions.data_helpers import save_bs, show_health_disclaimer_if_needed
 from functions.health_classifications import classify_bs
 from functions.blutzucker import badge_css, point_color, risk_badge
 from utils.themes import inject_theme, get_theme
@@ -23,26 +23,8 @@ BS_CRIT_LOW=3.0; BS_WARN_LOW=3.5; BS_NORMAL_LOW=3.9
 BS_NORMAL_HIGH=5.5; BS_WARN_HIGH=7.0; BS_CRIT_HIGH=7.0
 
 
-def badge_css(status):
-    return {
-        t("bs_normal"):    "status-normal",
-        t("bs_warn_low"):  "status-warning",
-        t("bs_warn_high"): "status-warning-h",
-        t("bs_crit_low"):  "status-critical",
-        t("bs_crit_high"): "status-critical",
-    }.get(status, "status-normal")
 
-def point_color(status):
-    return {
-        t("bs_normal"):    "#22c55e",
-        t("bs_warn_low"):  "#f59e0b",
-        t("bs_warn_high"): "#f97316",
-        t("bs_crit_low"):  "#ef4444",
-        t("bs_crit_high"): "#ef4444",
-    }.get(status, "#22c55e")
 
-def risk_badge(status):
-    return f'<span class="{badge_css(status)}">{e(status)}</span>'
 
 def show_status_message(value, status):
     if show_health_disclaimer_if_needed():
@@ -60,8 +42,6 @@ def show_status_message(value, status):
     elif status == ch:
         st.error("🔴 Kritisch hoher Wert – Diabetes-Verdacht (≥ 7.0 mmol/l). Bitte zeitnah eine Ärztin oder einen Arzt aufsuchen.")
 
-def save_bs():
-    st.session_state["data_manager"].save_user_data(st.session_state["blood_sugar_df"], "blood_sugar.csv")
 
 # ── Styling ───────────────────────────────────────────────────────────────────
 st.markdown("""<style>
@@ -96,7 +76,7 @@ if submitted:
     df = df.sort_values("date").reset_index(drop=True)
     st.session_state["blood_sugar_df"] = df
     save_bs()
-    status = classify_bs(bs_value)
+    status, _ = classify_bs(bs_value)
     st.markdown(f'**{t("bs_saved_value")}:** {bs_value:.1f} mmol/l &nbsp; {risk_badge(status)}', unsafe_allow_html=True)
     st.write("")
     show_status_message(bs_value, status)
@@ -144,7 +124,7 @@ else:
     st.markdown(f"#### 📋 {t('overview')}")
     rows_html = ""
     for _, row in df.sort_values("date", ascending=False).iterrows():
-        status = classify_bs(row["value"])
+        status, _ = classify_bs(row["value"])
         rows_html += f"""<tr>
             <td style='padding:0.5rem 0.75rem'>{e(str(row['date']))}</td>
             <td style='padding:0.5rem 0.75rem;text-align:center'>{row['value']:.1f}</td>

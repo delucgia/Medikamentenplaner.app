@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from datetime import date
 from utils.translations import t
 from functions.format_helpers import e
-from functions.data_helpers import save_bp
+from functions.data_helpers import save_bp, show_health_disclaimer_if_needed
 from functions.health_classifications import classify_bp
 from functions.blutdruck import badge_css, point_color, risk_badge
 from utils.themes import inject_theme, get_theme
@@ -22,15 +22,6 @@ theme = get_theme()
 BP_HYPO_SYS=100; BP_HYPO_DIA=60; BP_OPTIMAL_SYS=120; BP_OPTIMAL_DIA=80
 BP_NORMAL_SYS=129; BP_NORMAL_DIA=84; BP_HIGHNORM_SYS=139; BP_HIGHNORM_DIA=89
 BP_HYP1_SYS=159; BP_HYP1_DIA=99; BP_HYP2_SYS=179; BP_HYP2_DIA=109
-
-def classify_bp(sys, dia):
-    if sys < BP_HYPO_SYS or dia < BP_HYPO_DIA:    return t("bp_hypo")
-    if sys >= 180 or dia >= 110:                    return t("bp_hyp3")
-    if sys >= 160 or dia >= 100:                    return t("bp_hyp2")
-    if sys >= 140 or dia >= 90:                     return t("bp_hyp1")
-    if sys >= 130 or dia >= 85:                     return t("bp_highnorm")
-    if sys >= 120 or dia >= 80:                     return t("bp_normal")
-    return t("bp_optimal")
 
 
 
@@ -67,8 +58,6 @@ def show_status_message(sys, dia, status):
     if 100 <= sys <= 110 and dia >= 90:
         st.info("ℹ️ Zusatzhinweis: Isolierte diastolische Hypertonie – bitte ärztlich besprechen.")
 
-def save_bp():
-    st.session_state["data_manager"].save_user_data(st.session_state["blood_pressure_df"], "blood_pressure.csv")
 
 # ── Styling ───────────────────────────────────────────────────────────────────
 st.markdown("""<style>
@@ -108,7 +97,7 @@ if submitted:
     df = df.sort_values("date").reset_index(drop=True)
     st.session_state["blood_pressure_df"] = df
     save_bp()
-    status = classify_bp(bp_sys, bp_dia)
+    status, _ = classify_bp(bp_sys, bp_dia)
     st.markdown(f'**{t("bp_saved_value")}:** {bp_sys}/{bp_dia} mmHg &nbsp; {risk_badge(status)}', unsafe_allow_html=True)
     st.write("")
     show_status_message(bp_sys, bp_dia, status)
@@ -160,7 +149,7 @@ else:
     st.markdown(f"#### 📋 {t('overview')}")
     rows_html = ""
     for _, row in df.sort_values("date", ascending=False).iterrows():
-        status = classify_bp(int(row["systolic"]), int(row["diastolic"]))
+        status, _ = classify_bp(int(row["systolic"]), int(row["diastolic"]))
         rows_html += f"""<tr>
             <td style='padding:0.5rem 0.75rem'>{e(str(row['date']))}</td>
             <td style='padding:0.5rem 0.75rem;text-align:center'>{int(row['systolic'])}</td>
