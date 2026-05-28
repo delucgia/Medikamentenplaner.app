@@ -1,6 +1,8 @@
 # 💊 MediTrack
 ### Die App für smarte Medikamenten- und Gesundheitsverwaltung
 
+Folgender Link führt dich direkt zur App: https://medikamentenplanerapp.streamlit.app
+
 MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverlässig zu verwalten, Gesundheitswerte zu tracken und den Überblick über ihre persönliche Gesundheit zu behalten. Die App erhöht die Medikamentensicherheit und erleichtert den Alltag – für mehr Lebensqualität.
 
 ---

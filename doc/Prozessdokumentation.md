@@ -2,8 +2,8 @@
 
 **Modul:** Informatik 2  
 **Applikationsname:** MediTrack – Medikamenten- und Gesundheitstracker  
-**Technologie:** Python · Streamlit · SwitchDrive (WebDAV) · fpdf2 · Plotly · SVG
-**Zeitraum:** April 2026 - Mai 2026
+**Technologie:** Python · Streamlit · SwitchDrive (WebDAV) · fpdf2 · Plotly · SVG  
+**Zeitraum:** Mai 2026
 
 ---
 
@@ -69,9 +69,11 @@ Die Startseite begrüsst die Nutzerin oder den Nutzer personalisiert (Guten Morg
 
 ### 3.6 Tagesstimmung
 - 5 Stufen mit Emoji-Skala: 😄 😙 😐 😕 😞
+- Einfühlsame Hauptfrage und Einleitungstext, der erklärt warum die Stimmungserfassung wichtig ist
 - Optionaler Freitext-Kommentar
 - Plotly-Verlaufschart mit übersetzten Achsenbeschriftungen
-- Letzte 7 Einträge als Karten, Löschfunktion
+- Zeitraum-Filter (7 Tage, 30 Tage, 3 Monate, 1 Jahr, Alle)
+- Letzte Einträge als Karten, Löschfunktion
 
 ### 3.7 Abzeichen-System (Achievements)
 11 freischaltbare Abzeichen motivieren zu einer konsequenten Nutzung der App:
@@ -101,22 +103,23 @@ Das Maskottchen begleitet die Nutzerin oder den Nutzer durch die gesamte App. Es
 - **Dr. Care** 🩺 – Doktor-Figur, professionell und kompetent
 
 **4 Stimmungen je nach Kontext:**
-- 😄 **Fröhlich** – Standard, Morgen/Mittag/Abend-Begrüssung
-- 🔥 **Aufgeregt** – Bei Streak ≥ 7 Tage oder neuem Achievement
-- 😟 **Besorgt** – Bei schlechten Gesundheitswerten oder ausstehenden Medikamenten
-- 😴 **Müde** – Nach 20 Uhr
+- 😄 **Fröhlich** – gute Gesundheitswerte (mit Lob) oder Tageszeit-Begrüssung
+- 🔥 **Aufgeregt** – bei Streak ≥ 7 Tage oder neuem Achievement
+- 😟 **Besorgt** – bei auffälligen Gesundheitswerten (Hyper-/Hypotonie, kritischer Blutzucker) oder ausstehenden Medikamenten
+- 😴 **Müde** – nach 20 Uhr
 
-Die Maskottchenwahl wird in den Einstellungen gespeichert und bleibt über alle Sitzungen erhalten.
+Die Stimmung wird über eine priorisierte Logik bestimmt: zuerst Achievements und Streak, dann Gesundheitswerte, dann ausstehende Medikamente, schliesslich Tageszeit. Bei einem frischen Konto ohne Daten erscheint eine Begrüssung. Die Maskottchen wurden mithilfe von KI als SVG-Grafiken gestaltet. Die Maskottchenwahl wird in den Einstellungen gespeichert und bleibt über alle Sitzungen erhalten.
 
 ### 3.9 Profil
 - 3 Tabs: Persönlich / Medizinisch / Notfall
 - Geburtsdatum als 3 separate Zahlenfelder (Jahr 1900 bis heute)
+- Medizinisch: Blutgruppe, bekannte Allergien und Vorerkrankungen
 - Gespeicherte Angaben als strukturierte Übersicht
 
 ### 3.10 Einstellungen
 - **4 Sprachen:** DE / FR / IT / EN
-- **9 Farbthemen** mit Vorschau
-- **3 Maskottchen** mit Vorschau
+- **9 Farbthemen** mit Farbvorschau
+- **3 Maskottchen** mit SVG-Vorschau zur Auswahl
 - Einstellungen werden in `settings.json` pro User auf SwitchDrive gespeichert
 
 ### 3.11 PDF-Export
@@ -176,6 +179,25 @@ Der Streak wird rückwärts von heute berechnet. Für jeden Tag wird geprüft, o
 
 Vergleicht den Durchschnitt der ersten und zweiten Hälfte der letzten 7 Messungen. Liegt die Differenz unter 30% der Standardabweichung → stabil, sonst steigend oder sinkend.
 
+### 4.8 Code-Architektur und Wiederverwendbarkeit (DRY & SRP)
+
+Um die Codequalität zu sichern und Wiederholungen zu vermeiden, wurden alle mehrfach verwendeten Funktionen in einen eigenen `functions/` Ordner ausgelagert. Dies folgt zwei wichtigen Prinzipien:
+
+- **DRY (Don't Repeat Yourself):** Jede Funktion existiert nur an einer einzigen Stelle. Statt z. B. die Funktion zur Wochentag-Formatierung in mehreren Views zu kopieren, wird sie einmal definiert und überall importiert.
+- **SRP (Single Responsibility Principle):** Jedes Modul hat eine klar abgegrenzte Aufgabe.
+
+Der `functions/` Ordner ist wie folgt strukturiert:
+
+| Modul | Verantwortung |
+|---|---|
+| `format_helpers.py` | HTML-Escaping, ID-Generierung, Wochentag- und Monatsformatierung |
+| `data_helpers.py` | Speichern und Laden von Daten, Streak- und Trend-Berechnung, Einnahme-Prüfungen |
+| `health_classifications.py` | Medizinische Klassifizierung von Blutdruck und Blutzucker |
+| `blutdruck.py` | Blutdruck-spezifische Darstellungsfunktionen (Farben, Badges) |
+| `blutzucker.py` | Blutzucker-spezifische Darstellungsfunktionen (Farben, Badges) |
+
+Die Views importieren diese Funktionen mit z. B. `from functions.data_helpers import compute_streak`. So bleibt der Code in den Views schlank und übersichtlich, und Änderungen an einer Funktion wirken sich automatisch überall aus.
+
 ---
 
 ## 5. Design-Entscheidungen
@@ -191,6 +213,8 @@ Vergleicht den Durchschnitt der ersten und zweiten Hälfte der letzten 7 Messung
 | `mood_df` immer frisch laden | Verhindert veraltete Daten nach App-Neustart |
 | `inject_theme()` vor `pg.run()` | Einzige Möglichkeit, Sidebar-Farbe global zu setzen |
 | fpdf2 ohne Emojis | Helvetica unterstützt keine Unicode-Emojis |
+| Zentraler `functions/` Ordner | DRY-Prinzip: keine Code-Duplikate, einfachere Wartung |
+| Daten nur über DataManager | Keine CSV-Dateien im öffentlichen GitHub-Repo, sichere Speicherung in SwitchDrive |
 
 ---
 
@@ -220,6 +244,18 @@ Vergleicht den Durchschnitt der ersten und zweiten Hälfte der letzten 7 Messung
 **Problem:** `todays_meds` war noch nicht definiert als Vita die Variable brauchte.  
 **Lösung:** `todays_meds` früher im Code berechnen, vor der Vita-Stimmungslogik.
 
+### Herausforderung 7: Code-Duplikate beim Refactoring
+**Problem:** Beim Auslagern der Funktionen in den `functions/` Ordner blieben teilweise lokale Kopien in den Views zurück, die mit den importierten Funktionen kollidierten (z. B. eine lokale `compute_streak()` mit einem Bug, die die importierte überschrieb).  
+**Lösung:** Systematisch alle lokalen Duplikate entfernt und sichergestellt, dass die Views ausschliesslich die zentralen Funktionen importieren.
+
+### Herausforderung 8: Daten von anderen Nutzern wurden übernommen
+**Problem:** Beim Wechsel zu einem neuen Benutzerkonto blieben die Daten des vorherigen Users im Session State.  
+**Lösung:** Eine User-Wechsel-Erkennung in `app.py` löscht beim Login eines anderen Kontos alle alten Daten aus dem Session State.
+
+### Herausforderung 9: Unicode-Zeichen im PDF
+**Problem:** Sonderzeichen wie das Minus in Blutgruppen (A−) oder leere Werte (`nan`) führten zu Fehlern beim PDF-Export.  
+**Lösung:** Eine `_sanitize()` Funktion ersetzt alle nicht-Latin-1-Zeichen und leere Werte durch saubere Platzhalter.
+
 ---
 
 ## 7. Verwendete Bibliotheken
@@ -237,7 +273,8 @@ Vergleicht den Durchschnitt der ersten und zweiten Hälfte der letzten 7 Messung
 ## 8. Reflexion
 
 ### Was gut funktioniert hat
-- Das modulare Aufbau mit separaten Views und Utils macht den Code gut wartbar
+- Der modulare Aufbau mit separaten Views, Utils und Functions macht den Code gut wartbar
+- Das konsequente Anwenden der DRY- und SRP-Prinzipien hat den Code deutlich übersichtlicher gemacht
 - Das Maskottchen und das Abzeichen-System geben der App eine einzigartige Persönlichkeit
 - Die Mehrsprachigkeit wurde durchgängig und konsequent umgesetzt
 - Die medizinischen Klassifizierungen (DGK-Leitlinien) geben der App professionelle Qualität
@@ -247,6 +284,7 @@ Vergleicht den Durchschnitt der ersten und zweiten Hälfte der letzten 7 Messung
 - Streamlits Rendering-Verhalten bei mehrzeiligem HTML erforderte viel Trial-and-Error
 - Die globale Theme-Injection (Sidebar) war eine nicht dokumentierte Einschränkung
 - SVG-Maskottchen mit konsistenter Qualität für alle 3 Charaktere und 4 Stimmungen zu erstellen
+- Das nachträgliche Refactoring in den `functions/` Ordner erforderte Sorgfalt, damit keine Funktionen doppelt oder fehlerhaft blieben
 
 ### Was man verbessern könnte
 - Konfetti-Animation beim Freischalten eines Achievements
