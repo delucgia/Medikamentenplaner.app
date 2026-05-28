@@ -24,7 +24,7 @@ MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverläss
 
 ### 😊 Tagesstimmung
 - Stimmungserfassung mit Emoji-Skala und optionalem Kommentar
-- Verlaufschart der letzten 30 Tage
+- Verlaufschart mit wählbarem Zeitraum (7 Tage bis 1 Jahr)
 
 ### 🔥 Streak-System
 - Motivierende Anzeige wie viele Tage in Folge alle Medikamente eingenommen wurden
@@ -36,14 +36,16 @@ MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverläss
 ### 🐾 Maskottchen
 - Persönliches Maskottchen das durch die App begleitet und motiviert
 - 3 wählbare Charaktere: **Vita** (Herz), **Medi** (Pille), **Dr. Care** (Doktor)
-- 4 kontextabhängige Stimmungen: fröhlich, aufgeregt, besorgt, müde
+- 4 kontextabhängige Stimmungen: reagiert auf Streak, Gesundheitswerte, ausstehende Medikamente und Tageszeit (fröhlich, aufgeregt, besorgt, müde)
+- Die Maskottchen wurden mithilfe von KI als SVG-Grafiken kreiert
 
 ### 📄 PDF-Export
 - Export von Einnahmen, Blutdruck, Blutzucker und Stimmung als PDF
+- Auswahl der gewünschten Bereiche
 - Ideal für den nächsten Arztbesuch
 
 ### 👤 Persönliches Profil
-- Persönliche Angaben, Blutgruppe, Allergien und Notfallkontakt speichern
+- Persönliche Angaben, Blutgruppe, Allergien, Vorerkrankungen und Notfallkontakt speichern
 
 ### ⚙️ Personalisierung
 - **4 Sprachen:** 🇩🇪 Deutsch · 🇫🇷 Français · 🇮🇹 Italiano · 🇬🇧 English
@@ -76,19 +78,9 @@ MediTrack unterstützt Nutzerinnen und Nutzer dabei, ihre Medikamente zuverläss
 
 ---
 
-## ▶️ Installation und Start
+## 🔒 Datenspeicherung
 
-```bash
-# Repository klonen
-git clone https://github.com/your-repo/meditrack.git
-cd meditrack
-
-# Abhängigkeiten installieren
-pip install -r requirements.txt
-
-# App starten
-streamlit run app.py
-```
+Alle nutzerspezifischen und sensiblen Daten werden **pro Benutzer sicher in der SwitchDrive-Cloud** gespeichert – nicht im GitHub-Repository. Die Speicherung erfolgt ausschliesslich über die Methoden des `DataManager` (`save_user_data`, `load_user_data`, `save_app_data`, `load_app_data`).
 
 ---
 
