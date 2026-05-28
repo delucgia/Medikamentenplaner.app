@@ -4,18 +4,19 @@ Blutdruck-Tagebuch – vollständig übersetzt.
 Medizinische Hinweistexte sind auf Deutsch (Sicherheit).
 """
 
-import html
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import date
 from utils.translations import t
+from functions.format_helpers import e
+from functions.data_helpers import save_bp
+from functions.health_classifications import classify_bp
+from functions.blutdruck import badge_css, point_color, risk_badge
 from utils.themes import inject_theme, get_theme
 
 inject_theme()
 theme = get_theme()
-
-def e(x): return html.escape(str(x))
 
 # ── Grenzwerte ────────────────────────────────────────────────────────────────
 BP_HYPO_SYS=100; BP_HYPO_DIA=60; BP_OPTIMAL_SYS=120; BP_OPTIMAL_DIA=80
@@ -31,32 +32,11 @@ def classify_bp(sys, dia):
     if sys >= 120 or dia >= 80:                     return t("bp_normal")
     return t("bp_optimal")
 
-def badge_css(status):
-    m = {
-        t("bp_hypo"): "status-hypo", t("bp_optimal"): "status-optimal",
-        t("bp_normal"): "status-normal", t("bp_highnorm"): "status-highnorm",
-        t("bp_hyp1"): "status-hyp1", t("bp_hyp2"): "status-hyp2",
-        t("bp_hyp3"): "status-hyp3",
-    }
-    return m.get(status, "status-normal")
 
-def point_color(status):
-    m = {
-        t("bp_hypo"): "#8b5cf6", t("bp_optimal"): "#22c55e",
-        t("bp_normal"): "#86efac", t("bp_highnorm"): "#fbbf24",
-        t("bp_hyp1"): "#f97316", t("bp_hyp2"): "#ef4444",
-        t("bp_hyp3"): "#b91c1c",
-    }
-    return m.get(status, "#22c55e")
 
-def risk_badge(status):
-    css = badge_css(status)
-    return f'<span class="{css}">{e(status)}</span>'
 
 def show_status_message(sys, dia, status):
-    lang = st.session_state.get("language","de")
-    if lang != "de":
-        st.info(t("health_notes_disclaimer"))
+    if show_health_disclaimer_if_needed():
         return
     hyp3 = t("bp_hyp3"); hyp2 = t("bp_hyp2"); hyp1 = t("bp_hyp1")
     highn = t("bp_highnorm"); norm = t("bp_normal")

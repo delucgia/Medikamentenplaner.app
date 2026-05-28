@@ -4,51 +4,15 @@ Medikamentenverwaltung: Übersicht, Hinzufügen, Bearbeiten, Löschen.
 Vollständig übersetzt via utils/translations.py
 """
 
-import html
 import streamlit as st
 import pandas as pd
 from datetime import datetime, time as dtime
 from utils.translations import t
 from utils.themes import get_theme
+from functions.format_helpers import e, next_id, format_days, is_confirmed, WEEKDAYS_DE_SHORT, get_day_label_map
+from functions.data_helpers import save_medications
 
 theme = get_theme()
-
-
-def e(text):
-    return html.escape(str(text))
-
-
-DAYS_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-
-
-def format_days(days_str):
-    """Formatiert den days-String (DE-intern) in die aktuelle Sprache."""
-    if not days_str or pd.isna(days_str):
-        return "—"
-    days = [d.strip() for d in str(days_str).split(",")]
-    if days == DAYS_DE:
-        return t("daily")
-    if days == ["Mo", "Di", "Mi", "Do", "Fr"]:
-        return t("mo_fr")
-    shorts_de = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-    shorts_translated = t("weekdays_short").split(",")
-    mapped = [
-        shorts_translated[shorts_de.index(d)] if d in shorts_de else d
-        for d in days
-    ]
-    return ", ".join(mapped)
-
-
-def next_id(df):
-    if df.empty or "id" not in df.columns:
-        return 1
-    return int(df["id"].max()) + 1
-
-
-def save_medications():
-    st.session_state["data_manager"].save_user_data(
-        st.session_state["medications_df"], "medications.csv"
-    )
 
 
 # ── Seite ─────────────────────────────────────────────────────────────────────
@@ -160,16 +124,14 @@ with tab_form:
     )
 
     # Wochentage: intern DE, angezeigt in aktueller Sprache
-    shorts_de         = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-    shorts_translated = t("weekdays_short").split(",")
-    day_label_map     = dict(zip(shorts_de, shorts_translated))
+    day_label_map = get_day_label_map()
 
     with st.form("medication_form", clear_on_submit=True):
         name     = st.text_input(f"{t('med_name')} *", value=default_name)
         med_time = st.time_input(t("med_time"), value=default_time, step=1800)
         days     = st.multiselect(
             f"{t('med_days')} *",
-            options=DAYS_DE,
+            options=WEEKDAYS_DE_SHORT,
             default=default_days,
             format_func=lambda d: day_label_map.get(d, d)
         )

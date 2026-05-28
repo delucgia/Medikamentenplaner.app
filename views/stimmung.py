@@ -4,20 +4,16 @@ Tagesstimmung erfassen: Emoji-Skala, Freitext-Kommentar, Verlaufschart, Löschen
 Vollständig übersetzt via utils/translations.py
 """
 
-import html
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import date
 from utils.translations import t
 from utils.themes import inject_theme, get_theme
+from functions.format_helpers import e
 
 inject_theme()
 theme = get_theme()
-
-
-def e(text):
-    return html.escape(str(text))
 
 
 MOOD_OPTIONS = [

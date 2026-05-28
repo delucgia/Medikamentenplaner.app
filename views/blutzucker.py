@@ -4,29 +4,24 @@ Blutzucker-Tagebuch – vollständig übersetzt.
 Medizinische Hinweistexte sind auf Deutsch (Sicherheit).
 """
 
-import html
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import date
 from utils.translations import t
+from functions.format_helpers import e
+from functions.data_helpers import save_bs
+from functions.health_classifications import classify_bs
+from functions.blutzucker import badge_css, point_color, risk_badge
 from utils.themes import inject_theme, get_theme
 
 inject_theme()
 theme = get_theme()
 
-def e(x): return html.escape(str(x))
-
 # ── Grenzwerte (mmol/l) ───────────────────────────────────────────────────────
 BS_CRIT_LOW=3.0; BS_WARN_LOW=3.5; BS_NORMAL_LOW=3.9
 BS_NORMAL_HIGH=5.5; BS_WARN_HIGH=7.0; BS_CRIT_HIGH=7.0
 
-def classify_bs(value):
-    if value < BS_CRIT_LOW:    return t("bs_crit_low")
-    if value < BS_NORMAL_LOW:  return t("bs_warn_low")
-    if value <= BS_NORMAL_HIGH: return t("bs_normal")
-    if value < BS_CRIT_HIGH:   return t("bs_warn_high")
-    return t("bs_crit_high")
 
 def badge_css(status):
     return {
@@ -50,9 +45,7 @@ def risk_badge(status):
     return f'<span class="{badge_css(status)}">{e(status)}</span>'
 
 def show_status_message(value, status):
-    lang = st.session_state.get("language","de")
-    if lang != "de":
-        st.info(t("health_notes_disclaimer"))
+    if show_health_disclaimer_if_needed():
         return
     n=t("bs_normal"); wl=t("bs_warn_low"); wh=t("bs_warn_high")
     cl=t("bs_crit_low"); ch=t("bs_crit_high")

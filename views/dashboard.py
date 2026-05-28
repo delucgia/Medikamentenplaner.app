@@ -12,6 +12,9 @@ from datetime import date, datetime, timedelta
 from utils.translations import t
 from utils.themes import inject_theme, get_theme
 from utils.vita import mascot_svg, get_vita_mood
+from functions.format_helpers import e, is_confirmed, format_days, WEEKDAYS_DE_SHORT
+from functions.data_helpers import save_intakes, med_due_today, intake_exists_today, compute_streak, compute_trend
+from functions.health_classifications import classify_bp, classify_bs
 
 inject_theme()
 theme = get_theme()
@@ -27,23 +30,6 @@ def get_today_day_short():
     return shorts[datetime.today().weekday()]
 
 
-def format_days(days_str):
-    """Formatiert den days-String (DE-intern) in die aktuelle Sprache."""
-    if not days_str or pd.isna(days_str):
-        return "—"
-    days = [d.strip() for d in str(days_str).split(",")]
-    all_days_de = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-    if days == all_days_de:
-        return t("daily")
-    if days == ["Mo", "Di", "Mi", "Do", "Fr"]:
-        return t("mo_fr")
-    shorts_de = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-    shorts_translated = t("weekdays_short").split(",")
-    mapped = [
-        shorts_translated[shorts_de.index(d)] if d in shorts_de else d
-        for d in days
-    ]
-    return ", ".join(mapped)
 
 
 def med_due_today(days_str):
@@ -130,11 +116,10 @@ def compute_streak():
     meds = st.session_state["medications_df"]
     if df.empty or meds.empty:
         return 0
-    shorts_de = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-    streak = 0
+        streak = 0
     check_date = date.today()
     for _ in range(365):
-        day_name = shorts_de[check_date.weekday()]
+        day_name = WEEKDAYS_DE_SHORT[check_date.weekday()]
         due_meds = meds[meds["days"].apply(
             lambda d: day_name in [x.strip() for x in str(d).split(",")]
             if pd.notna(d) else False

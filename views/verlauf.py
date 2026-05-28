@@ -4,67 +4,21 @@ Einnahmeverlauf: Gruppiert nach Monat → Woche → Tag.
 Vollständig übersetzt via utils/translations.py
 """
 
-import html
 import streamlit as st
 import pandas as pd
 from datetime import date, datetime, timedelta, time as dtime
-from functions.time import get_week_range
 from utils.translations import t
 from utils.themes import get_theme
+from functions.format_helpers import e, next_id, format_days, is_confirmed, get_weekday_name, get_month_name, WEEKDAYS_DE_SHORT
+from functions.data_helpers import save_intakes
 
 theme = get_theme()
 
 
-def e(text):
-    return html.escape(str(text))
-
-
-DAYS_ALL = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-
-
-def get_weekday_name(weekday_int):
-    """Gibt den übersetzten Wochentagnamen zurück."""
-    return t("weekdays_long").split(",")[weekday_int]
-
-
-def get_month_name(month_int):
-    """Gibt den übersetzten Monatsnamen zurück."""
-    return t("months").split(",")[month_int - 1]
-
-
-def format_days(days_str):
-    """Formatiert den days-String (DE-intern) in die aktuelle Sprache."""
-    if not days_str or pd.isna(days_str):
-        return "—"
-    days = [d.strip() for d in str(days_str).split(",")]
-    if days == DAYS_ALL:
-        return t("daily")
-    if days == ["Mo", "Di", "Mi", "Do", "Fr"]:
-        return t("mo_fr")
-    shorts_de         = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-    shorts_translated = t("weekdays_short").split(",")
-    mapped = [
-        shorts_translated[shorts_de.index(d)] if d in shorts_de else d
-        for d in days
-    ]
-    return ", ".join(mapped)
-
-
-def is_confirmed(val):
-    return str(val).strip().lower() in ["true", "1", "yes"]
-
-
-def next_id(df):
-    if df.empty or "id" not in df.columns:
-        return 1
-    return int(df["id"].max()) + 1
-
-
-def save_intakes():
-    st.session_state["data_manager"].save_user_data(
-        st.session_state["intakes_df"], "intakes.csv"
-    )
-
+def get_week_range(dt):
+    monday = dt - timedelta(days=dt.weekday())
+    sunday = monday + timedelta(days=6)
+    return monday, sunday
 
 
 # ── Seite ─────────────────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ PDF-Export: Nutzer wählt welche Daten exportiert werden sollen.
 import streamlit as st
 import pandas as pd
 from utils.translations import t
+from functions.data_helpers import load_all_health_data
 from utils.themes import inject_theme, get_theme
 
 inject_theme()
@@ -17,11 +18,7 @@ st.caption(t("pdf_subtitle"))
 st.write("")
 
 # ── Daten laden ───────────────────────────────────────────────────────────────
-intakes_df = st.session_state.get("intakes_df", pd.DataFrame())
-bp_df      = st.session_state.get("blood_pressure_df", pd.DataFrame())
-bs_df      = st.session_state.get("blood_sugar_df", pd.DataFrame())
-mood_df    = st.session_state.get("mood_df", pd.DataFrame())
-profile    = st.session_state.get("profile", {})
+intakes_df, bp_df, bs_df, mood_df, _, profile = load_all_health_data()
 
 has_intakes = not intakes_df.empty
 has_bp      = not bp_df.empty

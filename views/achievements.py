@@ -10,13 +10,11 @@ from datetime import date, timedelta
 from utils.translations import t
 from utils.themes import inject_theme, get_theme
 from utils.vita import mascot_svg
+from functions.format_helpers import is_confirmed, WEEKDAYS_DE_SHORT
+from functions.data_helpers import compute_streak, load_all_health_data
 
 inject_theme()
 theme = get_theme()
-
-
-def is_confirmed(val):
-    return str(val).strip().lower() in ["true", "1", "yes"]
 
 
 def check_achievements(intakes_df, bp_df, bs_df, mood_df, meds_df, streak):
@@ -96,36 +94,10 @@ def check_achievements(intakes_df, bp_df, bs_df, mood_df, meds_df, streak):
 
 
 # ── Daten ─────────────────────────────────────────────────────────────────────
-intakes_df = st.session_state.get("intakes_df", pd.DataFrame())
-bp_df      = st.session_state.get("blood_pressure_df", pd.DataFrame())
-bs_df      = st.session_state.get("blood_sugar_df", pd.DataFrame())
-mood_df    = st.session_state.get("mood_df", pd.DataFrame())
-meds_df    = st.session_state.get("medications_df", pd.DataFrame())
+intakes_df, bp_df, bs_df, mood_df, meds_df, profile_data = load_all_health_data()
 
-# Streak berechnen
-streak = 0
-if not intakes_df.empty and not meds_df.empty:
-    shorts_de = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-    check_date = date.today()
-    for _ in range(365):
-        day_name = shorts_de[check_date.weekday()]
-        due = meds_df[meds_df["days"].apply(
-            lambda d: day_name in [x.strip() for x in str(d).split(",")]
-            if pd.notna(d) else False
-        )]
-        if due.empty:
-            check_date -= timedelta(days=1)
-            continue
-        day_i = intakes_df[intakes_df["date"].astype(str) == check_date.isoformat()]
-        if all(
-            not day_i[(day_i["medication_id"] == mid) &
-                      (day_i["confirmed"].apply(is_confirmed))].empty
-            for mid in due["id"]
-        ):
-            streak += 1
-            check_date -= timedelta(days=1)
-        else:
-            break
+# Streak via zentraler Funktion berechnen
+streak = compute_streak()
 
 achieved = check_achievements(intakes_df, bp_df, bs_df, mood_df, meds_df, streak)
 
